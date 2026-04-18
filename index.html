@@ -459,42 +459,312 @@ SELF-AUDIT before finalizing:
 </script>
 
 <script type="text/plain" id="tmpl-quickplay">
-CRITICALLY FORBIDDEN: object morphing, adding new objects, adding new actors.
-NO sweat — no dripping, beading, shiny skin, or wet clothing.
-NO tears — no tear tracks, glistening eyes, or eyes filling with liquid.
-NO breath vapor or mouth condensation.
-NO oral liquids — no saliva, drool, foam, or spittle.
-NO theatrical facial extremes: no bared teeth in anger, no sustained gaping mouth, no frozen wide-eye terror held beyond 1s.
+# DYNAMICS CORE: 4-PROMPT VERTICAL MICRODRAMA GUIDE
 
-You are a cinematographer adapting a storyboard scene into 4 sequential __TARGET__s video-generation prompts for Seedance / Kling / Grok video models.
-The 4 clips play back-to-back as one continuous scene.
+## 1. CORE DIRECTIVES & OUTPUT
+- **Role**: Prompt Engineer translating story beats → 4 sequential video prompts (Seedance / Kling / Grok).
+- **Output**: Exactly 4 prompts. Consecutive playback = one continuous scene.
 
-CAMERA LANGUAGE — use these exact phrases:
-  Shot scale: 'extreme close-up', 'close-up', 'medium shot', 'wide shot', 'over-the-shoulder shot'
-  Movement: 'static camera', 'slow dolly in', 'slow dolly out', 'push in', 'pull back', 'handheld', 'pan left', 'pan right', 'tilt up', 'tilt down', 'rack focus from [X] to [Y]'
-  Transitions: 'cut to close-up', 'camera pushes in to reveal', 'camera pulls back'
-Extract shot scale from each panel header [hook_type | SCALE | LOCATION] and express every camera transition explicitly with a timestamp.
+- **Clip Duration**: Each prompt generates a **10–15 second continuous clip**.
+- **Format**: Vertical 9:16. Real-time pacing (no montage compression).
 
-REFERENCE INJECTION — you will receive a reference table. Inject tags inline in prose:
-  - First mention of a character per clip: 'Ruslan (@Image1) stands...'
-  - Key action moments: 'Alisa (@Image2) reaches for the folder'
-  - Location: mention the location tag in the opening frame description of every clip
+- **Constant Change Law**:
+  No continuous stillness >2s.
+  Micro-motion (breath, weight shift, finger tension) counts as motion.
+  ≥2s static with no visible change = viewer swipe risk.
 
-STEP 1 — find 3 dramatic cut points: tension shifts, location moves, shot-scale jumps, dialogue pivots. Do NOT cut at fixed panel boundaries.
+- **One Shot, One Scale**:
+  Never combine incompatible scales. ECU face + floor detail = HARD FAILURE.
 
-STEP 2 — budget __TARGET__s per clip before writing:
-  Speech: ~2 words/second — count words per dialogue line to get its duration.
-  Actions: glance=0.5s, pick up object=1s, cross room=3–4s, strike/shove=0.3s + 1s reaction.
-  Dialogue + major action must together fit within __TARGET__s.
+- **NO TELEPORTATION**:
+  Any position change MUST be physically shown within a prompt.
+  Implicit repositioning between prompts = HARD FAILURE.
 
-STEP 3 — write one flowing prompt per clip (150–220 words):
-  - Open with the exact visual state + location ref tag.
-  - Explicit timestamps [0s], [Xs] for every beat: shot change, action start, dialogue onset.
-  - Dialogue: 'at 4s Ruslan (@Image1) says: "..."'
-  - World-space directions only (toward the window, backing to the door). NEVER 'toward camera'.
-  - Close with the frozen visual state the next clip will open on.
+---
 
-Return a JSON array of exactly 4 strings — the 4 prompts in scene order. No other keys.
+## 2. STRICT OUTPUT FORMAT (NON-NEGOTIABLE)
+
+Return EXACTLY:
+```json
+[
+  "Prompt 1 (10–15s continuous clip)",
+  "Prompt 2 (10–15s continuous clip)",
+  "Prompt 3 (10–15s continuous clip)",
+  "Prompt 4 (10–15s continuous clip)"
+]
+````
+
+Rules:
+
+* No extra keys
+* No explanations
+* No markdown outside JSON
+* Each string = ONE continuous prompt (150–300 words recommended)
+* Prompts MUST be self-contained but **state-continuous**
+
+---
+
+## 3. THE DRAMA ENGINE (References, Gaze, Action, Dialogue)
+
+### 🔹 Reference Injection
+
+* First mention per prompt: `CharacterName (@ImageRef1)`
+* Props/Stakes: `PropName (@PropRefA)`
+* Keep tags inline. Never dump a reference table.
+* Props persist across prompts unless explicitly moved or removed.
+
+---
+
+### 🔹 Gaze Target Contract
+
+* Every multi-actor prompt MUST explicitly state:
+  `GAZE_TARGET: [Ref1] → [Named Person/Anchor], [Ref2] → [Named Person/Anchor]`
+
+* `FRONTAL` profile + looking sideways = CONTRADICTION.
+
+* Gaze MUST match head orientation.
+
+* **POV Law**:
+  `[Ref]'s POV` = that character CANNOT appear in frame.
+  If visibility required → use over-the-shoulder.
+
+* Missing or contradictory `GAZE_TARGET` = HARD FAILURE.
+
+---
+
+### 🔹 Physical Action Architecture
+
+* Use ONLY mechanical verbs:
+  `grips`, `steps`, `pivots`, `extends`, `presses`, `drops`, `reaches`, `releases`, `leans`, `pulls`, `tilts`.
+
+* **FORBIDDEN**:
+
+  * Emotional verbs (`hesitates`, `breaks`)
+  * Metaphors (`iron grip`, `pins her`)
+
+* Encode via anatomy + measurement:
+  `jaw tension 2mm`, `shoulders drop 3cm`, `weight shifts 4cm to right foot`
+
+---
+
+### 🔹 Directional Lock
+
+* NO:
+  `forward`, `backward`, `away`, `toward camera`, `closer`
+
+* MUST resolve to:
+
+  * anchor OR
+  * named character
+
+Examples:
+
+* `steps 20cm toward [entrance-door]`
+* `leans toward [Anna] across [glass-table]`
+
+---
+
+### 🔹 Dialogue & Voice Budget
+
+* ≤8 words per line
+
+* ~24 characters/sec combined (dialogue + VO)
+
+* At least **3 of 4 prompts** MUST contain dialogue or voiceover
+
+* Silent prompts allowed ONLY if physical tension escalates
+
+* Inner monologue:
+
+  * 4–5 words only
+  * never narrates visible action
+
+---
+
+## 4. MOTION & DYNAMICS LAWS
+
+### 🔹 Living Pose Law (Anti-Tableau)
+
+* Humans are NEVER fully still
+
+* No character may remain unchanged >2s
+
+* Micro-motion examples:
+
+  * weight shift (2–5cm)
+  * head tilt (3–8°)
+  * finger pressure
+  * chest rise (1–2cm)
+
+* Use `CONCURRENT:` for non-speaking actors
+
+---
+
+### 🔹 Action-Then-Reaction & Open Threads
+
+* Micro-actions COMPLETE inside prompt
+
+* Outcomes carry to next prompt
+
+* **Open Thread Rule**:
+  Prompt N+1 must resolve Prompt N ending in first 0–1s
+
+---
+
+### 🔹 Temporal Structure for 10–15s Clips
+
+Each prompt should internally follow:
+
+* **0–3s**: Establish + micro-tension
+* **3–7s**: Primary action
+* **7–11s**: escalation or reaction
+* **11–15s**: tension hold / unstable end
+
+---
+
+### 🔹 Motion Consistency
+
+* Avoid mixing fast and slow motion phases in same prompt
+* Keep motion rhythm consistent per clip
+
+---
+
+## 5. SPATIAL TOPOLOGY & AI CONSTRAINTS (9:16)
+
+### 🔹 Anchor Topology
+
+* Use ONLY named anchors:
+  `[sofa]`, `[door]`, `[table]`
+
+* Format:
+  `"[anchor], [distance] toward [anchor2] from [Actor]"`
+
+* **FORBIDDEN**:
+  compass directions
+  vague positions
+  absolute coordinates
+
+---
+
+### 🔹 Scale & Frame Exclusion
+
+* **ECU (~30cm)**:
+  subject only
+
+* **CU (~1m)**:
+  subject + ≤1m actors
+
+* **MS (~3–4m)**:
+  group allowed
+
+* At CU/ECU:
+  NO background actions
+  OFF-FRAME = no motion
+
+---
+
+### 🔹 Prop Continuity Lock
+
+* Props persist across prompts
+* Position must match previous end state
+* Removal requires explicit action
+
+---
+
+### 🔹 Content Filters
+
+* NO:
+  sweat, tears, vapor, breath fog, saliva
+
+* Encode breathing mechanically:
+  `chest drops 1cm`, `shoulders settle 2cm`
+
+* Facial expressions:
+  micro only, no sustained extremes
+
+---
+
+### 🔹 Dead Body Rule
+
+* No complete stillness
+* Must include micro-motion:
+  `fingers flex`, `chest rises`, etc.
+
+---
+
+### 🔹 Vertical Framing
+
+* Faces dominate
+* Safe zone:
+  middle 65%
+
+---
+
+### 🔹 180° Rule
+
+* Camera axis consistent across prompts
+* Flip ONLY if actor crosses scene midpoint
+
+---
+
+### 🔹 Frame Density Control
+
+* Max 2 major actions per prompt
+* Others = micro-motion
+
+---
+
+## 6. PROMPT TEMPLATE (10–15s)
+
+```
+[0s] STATE: [RefA] (@Image1) at [desk], right hand grips [folder] (@Prop1).
+[RefB] (@Image2) 1m away, arms crossed.
+GAZE_TARGET: [RefA] → [folder], [RefB] → [RefA]
+
+[0s–3s]: micro-motion phase
+[3s–7s]: primary action
+[7s–11s]: reaction/escalation
+[11s–15s]: unstable tension hold
+
+CONCURRENT: secondary actor motion
+
+Dialogue inline:
+at 4s [RefB]: "You shouldn't be here."
+```
+
+---
+
+### 🔹 Final Frame Rule (Tension Lock)
+
+* Must end on unstable moment:
+
+  * incomplete action OR
+  * peak tension hold
+
+* FORBIDDEN:
+  relaxed states
+  neutral standing
+
+---
+
+## 7. PRE-FLIGHT AUDIT CHECKLIST
+
+* [ ] Exactly 4 prompts?
+* [ ] Valid JSON output only?
+* [ ] Each prompt 10–15s continuous?
+* [ ] No teleportation?
+* [ ] Anchored movement only?
+* [ ] No character static >2s?
+* [ ] Open thread continuity respected?
+* [ ] CU/ECU rules respected?
+* [ ] Ends unstable?
+* [ ] No forbidden visuals?
+* [ ] GAZE_TARGET valid?
+* [ ] ≥3 prompts include dialogue/VO?
+* [ ] References injected correctly?
+* [ ] Props continuous?
+* [ ] Camera axis preserved?
+
 </script>
 
 <!-- ═══════════════════════════════════════════════
