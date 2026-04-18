@@ -1092,8 +1092,8 @@ function renderQuickplay() {
             <span class="badge ${hasClips ? 'badge-green' : 'badge-orange'}" style="margin-left:6px">${hasClips ? `клипов: ${clips.length}` : 'клипов нет'}</span>
           </div>
           <div class="actions">
-            <button class="btn btn-primary btn-sm" onclick="genQPPrompt(${JSON.stringify(ep.episode_id)}, ${JSON.stringify(scene.scene_local_id)})">Сгенерировать промпт</button>
-            <button class="btn btn-sm" onclick="copyQPPrompt(${JSON.stringify(sceneId)})">Копировать</button>
+            <button class="btn btn-primary btn-sm" onclick="genQPPrompt('${ep.episode_id}', '${scene.scene_local_id}')">Сгенерировать промпт</button>
+            <button class="btn btn-sm" onclick="copyQPPrompt('${sceneId}'">Копировать</button>
           </div>
         </div>
         <div id="qp-prompt-${sceneId}" class="prompt-area" style="max-height:200px;display:none"></div>
@@ -1101,7 +1101,7 @@ function renderQuickplay() {
           <label>Вставьте ответ чатбота (JSON-массив из 4 строк)</label>
           <textarea id="qp-resp-${sceneId}" class="mono" rows="6" placeholder='["промпт клипа 1...","клип 2...","клип 3...","клип 4..."]'>${clips ? JSON.stringify(clips, null, 2) : ''}</textarea>
           <div class="actions" style="margin-top:6px">
-            <button class="btn btn-sm btn-primary" onclick="saveQPClips(${JSON.stringify(sceneId)})">Сохранить клипы</button>
+            <button class="btn btn-sm btn-primary" onclick="saveQPClips('${sceneId}')">Сохранить клипы</button>
           </div>
         </div>
         ${hasClips ? renderClips(clips, sceneId) : ''}
