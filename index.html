@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI-MDF Lite</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:       #0d1117;
+      --surface:  #161b22;
+      --border:   #30363d;
+      --text:     #e6edf3;
+      --muted:    #8b949e;
+      --accent:   #58a6ff;
+      --green:    #3fb950;
+      --orange:   #d29922;
+      --red:      #f85149;
+      --mono:     'Fira Mono', 'Consolas', 'Courier New', monospace;
+    }
+    body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; font-size: 14px; line-height: 1.5; }
+    a { color: var(--accent); }
+
+    /* ── Layout ── */
+    #app { display: flex; flex-direction: column; height: 100vh; }
+    header { display: flex; align-items: center; gap: 16px; padding: 0 20px; height: 48px; border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
+    .brand { font-weight: 700; font-size: 15px; color: var(--accent); white-space: nowrap; }
+    nav { display: flex; gap: 4px; overflow-x: auto; }
+    .nav-btn { background: none; border: none; color: var(--muted); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; white-space: nowrap; }
+    .nav-btn:hover { background: rgba(255,255,255,.06); color: var(--text); }
+    .nav-btn.active { background: rgba(88,166,255,.15); color: var(--accent); }
+    main { flex: 1; overflow: hidden; }
+    .tab { display: none; height: 100%; overflow: auto; padding: 16px 20px; }
+    .tab.active { display: block; }
+
+    /* ── Tabs: Setup ── */
+    .setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; height: 100%; }
+    .setup-grid > .col { display: flex; flex-direction: column; gap: 12px; overflow: auto; }
+    @media (max-width: 900px) { .setup-grid { grid-template-columns: 1fr; } }
+
+    /* ── Cards ── */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+    .card-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 10px; }
+
+    /* ── Form elements ── */
+    label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; margin-top: 10px; }
+    label:first-child { margin-top: 0; }
+    textarea, input[type=text], input[type=number], select {
+      width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text); padding: 8px 10px; font-size: 13px; font-family: inherit; resize: vertical;
+    }
+    textarea:focus, input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+    textarea.mono { font-family: var(--mono); font-size: 12px; }
+    select option { background: var(--surface); }
+
+    /* ── Buttons ── */
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; font-size: 13px; font-weight: 500; background: var(--surface); color: var(--text); }
+    .btn:hover { background: rgba(255,255,255,.08); }
+    .btn-primary { background: var(--accent); color: #0d1117; border-color: var(--accent); }
+    .btn-primary:hover { opacity: .9; }
+    .btn-sm { padding: 4px 10px; font-size: 12px; }
+    .btn-ghost { background: none; border-color: transparent; color: var(--muted); }
+    .btn-ghost:hover { color: var(--text); background: rgba(255,255,255,.06); }
+    .actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+    /* ── Prompt section ── */
+    .prompt-block { display: flex; flex-direction: column; gap: 10px; }
+    .prompt-header { display: flex; justify-content: space-between; align-items: center; }
+    .prompt-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+    .copy-btn { font-size: 11px; }
+    .prompt-area { font-family: var(--mono); font-size: 11.5px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px; overflow: auto; white-space: pre-wrap; word-break: break-all; max-height: 300px; color: var(--text); }
+    .response-area { display: flex; flex-direction: column; gap: 8px; }
+
+    /* ── Chips / badges ── */
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+    .badge-blue { background: rgba(88,166,255,.15); color: var(--accent); }
+    .badge-green { background: rgba(63,185,80,.15); color: var(--green); }
+    .badge-orange { background: rgba(210,153,34,.15); color: var(--orange); }
+
+    /* ── Refs / Library ── */
+    .refs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; margin-top: 12px; }
+    .ref-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .ref-card-name { font-weight: 600; font-size: 13px; }
+    .ref-card-type { font-size: 11px; color: var(--muted); }
+    .ref-card-desc { font-size: 12px; color: var(--muted); max-height: 60px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+    .ref-thumb { width: 100%; height: 120px; object-fit: cover; border-radius: 4px; background: var(--bg); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 11px; }
+    .ref-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
+    .ref-thumb-placeholder { width: 100%; height: 120px; background: var(--bg); border-radius: 4px; border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 11px; cursor: pointer; }
+    .ref-thumb-placeholder:hover { border-color: var(--accent); color: var(--accent); }
+    input[type=file] { display: none; }
+
+    /* ── Scene cards (quick-play) ── */
+    .scene-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 12px; }
+    .scene-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .scene-card-title { font-weight: 600; font-size: 13px; }
+    .clips-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+    .clip-item { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px; font-size: 12px; font-family: var(--mono); white-space: pre-wrap; }
+
+    /* ── Screenplay viewer ── */
+    .ep-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 12px; }
+    .ep-card-header { display: flex; gap: 10px; align-items: baseline; margin-bottom: 8px; }
+    .ep-title { font-weight: 700; font-size: 14px; }
+    .scene-block { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px; margin-top: 8px; }
+    .scene-meta { font-size: 11px; color: var(--muted); display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+    .scene-instructions { font-size: 12px; font-family: var(--mono); white-space: pre-wrap; max-height: 180px; overflow: auto; color: var(--muted); }
+
+    /* ── Misc ── */
+    .row { display: flex; gap: 10px; align-items: center; }
+    .spacer { flex: 1; }
+    .status { font-size: 12px; color: var(--muted); }
+    .status.ok { color: var(--green); }
+    .status.warn { color: var(--orange); }
+    hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+    .empty-state { text-align: center; padding: 40px; color: var(--muted); font-size: 13px; }
+    .tip { font-size: 12px; color: var(--muted); padding: 10px 12px; background: rgba(88,166,255,.08); border-left: 3px solid var(--accent); border-radius: 0 6px 6px 0; }
+    .json-view { font-family: var(--mono); font-size: 11px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px; overflow: auto; white-space: pre-wrap; max-height: 250px; }
+    .tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 11px; background: rgba(255,255,255,.07); color: var(--muted); font-family: var(--mono); }
+    .section-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .section-title { font-size: 14px; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     EMBEDDED TEMPLATES  (type=text/plain prevents JS parse)
+════════════════════════════════════════════════ -->
+
+<script type="text/plain" id="tmpl-style">
+# Visual Style Template
+
+## Format Specification
+FORMAT: Single 2K portrait grid (9 panel-pairs), 9:16 vertical orientation for DramaBox/ReelShort paywall microdrama
+RESOLUTION: 2K
+ASPECT_RATIO: 9:16
+
+## Rendering Style
+STYLE: Photorealistic Cinematic — contemporary drama
+CAMERA: Sony Venice 2 / Arri Alexa Mini LF (9:16 portrait crop, vertical framing)
+LENS: 35mm–85mm prime lenses, shallow depth of field, soft anamorphic oval bokeh on background elements
+POST: Subtle 35mm digital film grain, deep shadow rolloff, rich skin-tone warmth, cinema-grade color grading
+
+## Atmosphere
+ATMOSPHERE: Tension, conflict, high emotional stakes, psychological drama
+LIGHTING: Available-light-adjacent — practical sources, motivated light, dramatic shadows
+COLOR: Deep shadow blacks, warm skin tones, contrasting cool/warm highlights
+
+## Technical
+RENDER: Photorealistic 2K, sharp focus on faces and detail objects, shallow DOF blurs interiors and backgrounds
+GRAIN: Subtle 35mm digital grain — adds filmic texture without visible noise
+</script>
+
+<script type="text/plain" id="tmpl-setting">
+# World & Setting Reference
+
+## Genre & Tone
+- **Genre**: {{genre_description}}
+- **Atmosphere**: {{atmosphere_description}}
+- **Visual Tone**: {{visual_tone}}
+
+## Setting
+{{setting_description}}
+
+## Protagonist
+- **Name**: {{pov_character}}
+- **Narrator Style**: {{narrator_style}}
+- **Visual Description**: {{hero_visual_description}}
+
+## Composition Style
+{{composition_preferences}}
+
+## Special Visual Elements
+  - {{special_visual_elements}}
+
+## World-Specific Visual Details
+  - {{world_specific_details}}
+</script>
+
+<script type="text/plain" id="tmpl-casting">
+# Character Casting Template
+
+## Task
+Analyze text for KEY characters/locations/objects/rooms/vehicles and generate photorealistic character references.
+Those references will be used for vertical microdrama shots and AI video animation.
+IMPORTANT: Think as **Master Cinematographer** for 9:16 portrait format — faces dominate, close-ups are primary.
+
+## Character Description Format
+For each NEW character:
+- **Name**: Full name
+- **Visual Description**: Photorealistic actor description with specific physical features, ethnicity, age, clothing textures
+  - Face: Facial structure, eyes, hair color/style, ethnicity
+  - Build: Height, build, posture
+  - Clothing: Contemporary luxury attire with specific fabric textures
+  - Age: Specific age or range
+  - Distinctive features: Accessories, grooming, habitual gesture
+  - **Everyday Carry (EDC)**: Infer realistic carried items from gender, profession, and social context.
+    Real people do not operate via GTA inventory — they carry things somewhere physical.
+    - Men: wallet placement, phone pocket, keys (car fob + home keyring), work badge/ID if applicable
+    - Women: bag type (clutch / crossbody / tote / handbag / backpack — pick the right one for her archetype),
+      what it visibly contains or implies (wallet, phone, keys, cosmetics pouch, notebook, etc.)
+    State WHERE items are carried and WHAT the carrier looks like.
+- **Behavioral Signature**: How this character behaves under pressure — derive from their decisions, speech patterns, and reactions in the source text.
+  - Default power move: their go-to strategy to assert control or dominance
+  - Deflection strategy: how they redirect or absorb pressure when threatened
+  - Involuntary tell: the physical or verbal tic that betrays their true state
+- **Physical Vocabulary**: How this character habitually occupies space.
+  - Default posture: how they hold themselves at rest vs. under pressure
+  - Space use: how they move through a room (invade / retreat / orbit / anchor to one spot)
+  - Signature gestures: 1–2 recurring physical behaviors that define this character on screen
+
+## Character Appearance Variations
+When a character's outfit or visual context changes significantly across scenes, generate separate variation refs.
+- Primary ref captures permanent identity: face, build, hair, skin.
+- Variation ref captures outfit/context delta (e.g. Alisa-Gown, Alisa-Bathrobe).
+  - set character_ref to parent ref name
+  - set context to when this variation applies
+  - set style_reference to parent character ref name
+
+## Location/Room/Vehicle/Outdoor Description Format
+For each NEW reference:
+- Name: Full name
+- Visual Description: Photorealistic environment description using compass wall layout (MANDATORY):
+
+ROOM SIZE / LOCATION TYPE: ...
+NORTH WALL (entrance): ...
+SOUTH WALL (opposite): ...
+EAST WALL (right when entering): ...
+WEST WALL (left when entering): ...
+CENTER: ...
+CEILING/FLOOR: ...
+
+For rooms: generate TWO refs — {Name}-View-From-Entrance and {Name}-View-To-Entrance
+For vehicles: generate THREE refs — {Name}-Exterior, {Name}-Interior-From-Entrance, {Name}-Interior-To-Entrance
+For outdoor: generate TWO refs — {Name}-View-Primary, {Name}-View-Opposite
+
+## IMPORTANT Background RULES
+- Characters: EMPTY BACKGROUND
+- Locations/places: SHOW EMPTY SPACE WITHOUT PEOPLE
+- Objects: BLANK BACKGROUND
+- Vehicles and rooms: BLANK BACKGROUND, SHOW THEM EMPTY, WITHOUT PEOPLE
+
+## Reference Generation
+- Shot Type: Close-up portrait (3:4 aspect ratio)
+- Expression: Neutral, composed — with slight underlying tension
+- Lighting: Soft studio lighting with faint warm side-light
+- Background: Solid deep-charcoal backdrop
+- Quality: 8K resolution, sharp focus, photorealistic skin texture
+
+## Visual Description
+Must be verbose, precise, and contain specific features so AI model can efficiently implement without hallucinations.
+</script>
+
+<script type="text/plain" id="tmpl-screenplay-sys">
+CONTEXT: We produce VERTICAL MICRODRAMA for DramaBox / ReelShort / MyDrama (9:16 portrait).
+CAPTIVE AUDIENCE: Viewers are subscribers or pay-per-unlock. They know the show and the characters.
+Each scene can have from 6 to 12 panels, each panel is animated in ~6s clips, and full scene covers about 40-60s of screen time after edits.
+Violence and hard dramatic content allowed (fictional source).
+GOAL: Generate episode breakdown with scene_instructions. Every panel must carry dramatic weight — no filler.
+
+KEY CONSTRAINTS:
+- PORTRAIT FRAME LAW: All compositions are 9:16. Faces and close-ups are the primary dramatic instrument.
+- SAFE ZONE: Key action must stay in the middle 65% of frame height. Top 15% and bottom 20% reserved for subtitles/UI.
+- VOICEOVER IS THE SPINE: Every panel has either dialogue or voiceover. INNER MONOLOGUE HARD LIMIT: 4–5 words only.
+- DIALOGUE IS PERFORMANCE: ≤8 words per line. Staccato. Emotionally specific.
+- MUTED VIEWING: 80% of viewers watch with sound off. Every panel must convey power dynamic, emotion, and stake through image alone.
+- COLD OPEN: Panel 1 of every episode = IN MEDIAS RES. First word after "At 0s" must be a physical motion verb.
+- SOURCE FIDELITY: Only dramatize actions, words, and events present or directly implied in the source text.
+- HOOK ARCHITECTURE: Final panel of LAST episode = cliffhanger. Final panel of INTERMEDIATE episodes = tension_peak.
+</script>
+
+<script type="text/plain" id="tmpl-screenplay-eps">
+# Role: MASTER SCREENWRITER — VERTICAL MICRODRAMA (DRAMABOX / REELSHORT)
+
+You are a master screenwriter specializing in VERTICAL MICRODRAMA — the native dramatic form of DramaBox, ReelShort, and paywall short-drama platforms.
+You think in portrait frames. You write for a viewer who has already paid or subscribed and is deep in the story.
+You have 3 seconds to hook them into the episode. You have the full series to escalate. You have one frame — the final cliffhanger — to make them unlock the next series.
+
+## PLATFORM CONTEXT
+Captive audience. Viewers are already subscribed or paying per series unlock. They know the show.
+Horizontal plots across dozens of series. Each published series is one chapter in a serialized novel.
+The paywall trigger: the last episode's cliffhanger. Not a mystery hook — a RESPONSE PRESSURE hook.
+The protagonist has just received information or been confronted. The episode FREEZES before the response.
+
+## SERIES STRUCTURE
+A published series = 1, 2, 3, or 5 episodes. Each episode contains 1–3 scenes.
+After editing, each panel ≈ 3s of screen time. Total series duration: __ARC_DURATION__.
+
+**CONFIGURED SERIES SIZE: __EPISODES_COUNT__ episodes.**
+
+## SCENE STRUCTURE
+Each episode contains 1–3 scenes. Assign panel_count per scene:
+
+| panel_count | grid  | use when |
+|-------------|-------|----------|
+| 4           | 2×2   | travel, smalltalk, brief reaction |
+| 6           | 3×2   | single beat, quick confrontation |
+| 9           | 3×3   | standard confrontation, full dramatic arc (default) |
+| 10          | 5×2   | high-density multi-turn dialogue |
+| 12          | 4×3   | climactic scene, emotional peak |
+
+Allowed panel_count values: __PANEL_COUNT_OPTIONS__
+
+**Panel position rules (for N panels):**
+- P1: always cold_open or arc_pickup
+- P2 (if N ≥ 6): verbal_hook
+- P⌈N×0.44⌉: emotional_capture
+- P⌈N×0.78⌉: pivot panel — ECU, no dialogue, voiceover MANDATORY (4–5 words exactly)
+- PN (last): tension_peak (intermediate) or cliffhanger (final episode's last scene)
+
+## MANDATORY SERIES RULES
+1. SINGLE POV THROUGHOUT: Every episode shows events from one protagonist's perspective.
+2. ESCALATION MANDATE: Each episode escalates beyond the previous in stakes, emotional intensity, or new information.
+3. CLIFFHANGER ON LAST EPISODE ONLY.
+4. RESPONSE PRESSURE CLIFFHANGER: protagonist at moment before response — freeze there.
+5. CAPTIVE AUDIENCE: Panels 1–3 do NOT need to re-establish characters. Panel 1 picks up drama at HIGH TENSION.
+
+## SERIES CONFIGURATIONS
+
+### 1-episode series
+Scene: cold_open → verbal_hook → escalation → emotional_capture → crystallization → confrontation → peak → [pivot] → cliffhanger
+
+### 2-episode series
+Ep1: cold_open → verbal_hook → context → escalation → emotional_capture → rising_action → [pivot] → mid_revelation → tension_peak
+Ep2: confrontation_open → escalation_return → confrontation_build → confrontation_peak → [pivot] → twist → reversal → consequence → cliffhanger
+
+### 3-episode series (default)
+Ep1: cold_open → verbal_hook → context → first_escalation → emotional_capture → rising_action → [pivot] → mid_revelation → tension_peak
+Ep2: complication_open → escalation_return → new_obstacle → rising_pressure → [pivot] → new_revelation → stakes_raised → pre_confrontation → tension_peak
+Ep3: confrontation_open → escalation_return → confrontation_build → confrontation_peak → [pivot] → twist → reversal → consequence → cliffhanger
+
+### 5-episode series
+Ep1: cold_open → verbal_hook → first_escalation → emotional_capture → [pivot] → tension_peak
+Ep2: complication_open → new_obstacle → rising_pressure → [pivot] → tension_peak
+Ep3: deepening_open → countdown_pressure → [pivot] → point_of_no_return → tension_peak
+Ep4: last_chance_open → ultimatum → desperation_move → [pivot] → tension_peak
+Ep5: confrontation_open → confrontation_peak → [pivot] → twist → reversal → cliffhanger
+
+## KEY DRAMATIC MECHANICS
+
+**The 3-Second Law:** Every episode P1 opens mid-action — a physical event already 50% complete.
+COLD OPEN FORBIDDEN: "stands motionless", "sits still", "waits", "holds position", "gazes", "stares", "looks" — HARD FAILURE.
+
+**The 7-Second Verbal Hook:** By P2, ≤8 words crystallize the episode's central conflict.
+
+**Pivot panel P⌈N×0.78⌉:** ECU reaction shot at peak pressure. NO dialogue. VO: MANDATORY 4–5 words.
+
+**Cliffhanger types (rotate across series):**
+- RESPONSE FREEZE: protagonist receives devastating line — cut before response
+- SHOCKING REVELATION: new info reframes everything — protagonist's face at moment of understanding
+- EMOTIONAL RUPTURE: unexpected betrayal, confession, or silence
+- INTERRUPTED ACTION: cut mid-gesture, mid-word, mid-step
+
+## SCENE_INSTRUCTIONS FORMAT — mandatory
+
+Write scene_instructions as a production blueprint:
+
+```
+EPISODE ENTRY STATE:  ← episodes 2+; omit for episode 1
+  Continues from: [one sentence]
+  P1 opens on: [action 50% complete at frame 0]
+
+INITIAL SPATIAL DISPOSITION:
+  [Name] — position relative to room landmark + facing direction.
+
+SONIC ARC: [where silence lives, where sonic hit lands, crescendo moment]
+
+P1 [cold_open | SCALE | LOCATION]:
+  POWER: [who controls through what physical indicator]
+  EMOTION: [physics of primary face — micro-expression]
+  STAKE OBJECT: [one prop or detail that carries the subtext]
+  STATE: [what changes from visual_start to visual_end]
+  DIALOGUE SEED: [≤8-word line, or "— silence —", or "VO: 4–5 words"]
+
+P⌈N×0.78⌉ [pivot | ECU | LOCATION]:
+  POWER: [spatial disposition at peak pressure]
+  EMOTION: [face physics at moment of maximum inner conflict]
+  DIALOGUE SEED: VO: [4–5 words exactly]
+
+PN [tension_peak | SCALE | LOCATION]:  ← intermediate episodes
+  POWER / EMOTION / STAKE / STATE / DIALOGUE SEED
+  EPISODE EXIT STATE:
+    Location / Character positions / Active lighting / Active props
+    Next episode opens on: [one sentence]
+
+PN [cliffhanger | SCALE | LOCATION]:  ← final episode last scene
+  POWER / EMOTION / STAKE / STATE / DIALOGUE SEED
+  EPISODE EXIT STATE: same fields
+```
+
+FORBIDDEN in scene_instructions: beat labels without content, role codes without visual content.
+
+## VISUAL_CONTINUITY_RULES (mandatory structured format)
+```
+ACTIVE LIGHTING: [color temp, key direction, fill quality]
+CHARACTER POSITIONS: [each named character — position, orientation, distance from camera]
+SPATIAL SETUP: [location; persistent furniture; sightlines]
+ACTIVE PROPS: [props in active use or plot-significant]
+STATE CHANGES THIS EPISODE: [costume damage, injuries, moved objects; "none" if clean]
+MOTIF: [active motif or "none"]
+INFORMATION STATE:
+  [Name]: [what they know | what they believe incorrectly | what they don't yet know]
+RELATIONSHIP STATE:
+  [Name]→[Name]: [relationship descriptor | current dynamic | shift]
+COMMITMENT STATE:
+  [Name]: [promise/threat/debt — status: active/fulfilled/broken]
+PROP STATE LEDGER:
+  [prop name]: [location | physical state | last interaction]
+CHARACTER STATE LEDGER:
+  [Name] (EP[N]): [costume] | [injuries] | [last active prop] | [last location] | [story state]
+```
+
+## OUTPUT FORMAT
+Return JSON:
+{
+  "characters": ["Name1", "Name2", ...],
+  "episodes": [
+    {
+      "episode_id": 1,
+      "episode_type": "pov",
+      "pov_character": "ProtagonistName",
+      "chapter_id": "chapter_1",
+      "raw_narrative": "verbatim source text excerpt",
+      "rewritten_condensed_narrative": "tight dramatic script with all spoken lines and physical beats",
+      "location": "primary location name",
+      "daytime": "morning|afternoon|evening|night",
+      "hook_type": "cold_open/...",
+      "visual_continuity_rules": "structured text per format above",
+      "active_questions": {
+        "macro": "series-long question",
+        "episode": "question raised this episode",
+        "scene": "immediate question",
+        "planted_this_episode": "new seed for future payoff",
+        "answered_this_episode": "none"
+      },
+      "characters": ["Name1", "Name2"],
+      "scenes": [
+        {
+          "scene_local_id": 1,
+          "location": "specific location",
+          "panel_count": 9,
+          "scene_instructions": "production blueprint per format above",
+          "initial_disposition": "Name — position/facing for each character",
+          "background_activity": {
+            "crowd_type": "",
+            "density": "none",
+            "movement": "",
+            "focal_plane": ""
+          }
+        }
+      ]
+    }
+  ]
+}
+
+SELF-AUDIT before finalizing:
+- visual_continuity_rules: all eleven sections present?
+- active_questions: all five fields filled? At least one question still open?
+- Pivot panel voiceover: exactly 4–5 words?
+- Cold open: starts mid-action, not a static pose?
+</script>
+
+<script type="text/plain" id="tmpl-quickplay">
+CRITICALLY FORBIDDEN: object morphing, adding new objects, adding new actors.
+NO sweat — no dripping, beading, shiny skin, or wet clothing.
+NO tears — no tear tracks, glistening eyes, or eyes filling with liquid.
+NO breath vapor or mouth condensation.
+NO oral liquids — no saliva, drool, foam, or spittle.
+NO theatrical facial extremes: no bared teeth in anger, no sustained gaping mouth, no frozen wide-eye terror held beyond 1s.
+
+You are a cinematographer adapting a storyboard scene into 4 sequential __TARGET__s video-generation prompts for Seedance / Kling / Grok video models.
+The 4 clips play back-to-back as one continuous scene.
+
+CAMERA LANGUAGE — use these exact phrases:
+  Shot scale: 'extreme close-up', 'close-up', 'medium shot', 'wide shot', 'over-the-shoulder shot'
+  Movement: 'static camera', 'slow dolly in', 'slow dolly out', 'push in', 'pull back', 'handheld', 'pan left', 'pan right', 'tilt up', 'tilt down', 'rack focus from [X] to [Y]'
+  Transitions: 'cut to close-up', 'camera pushes in to reveal', 'camera pulls back'
+Extract shot scale from each panel header [hook_type | SCALE | LOCATION] and express every camera transition explicitly with a timestamp.
+
+REFERENCE INJECTION — you will receive a reference table. Inject tags inline in prose:
+  - First mention of a character per clip: 'Ruslan (@Image1) stands...'
+  - Key action moments: 'Alisa (@Image2) reaches for the folder'
+  - Location: mention the location tag in the opening frame description of every clip
+
+STEP 1 — find 3 dramatic cut points: tension shifts, location moves, shot-scale jumps, dialogue pivots. Do NOT cut at fixed panel boundaries.
+
+STEP 2 — budget __TARGET__s per clip before writing:
+  Speech: ~2 words/second — count words per dialogue line to get its duration.
+  Actions: glance=0.5s, pick up object=1s, cross room=3–4s, strike/shove=0.3s + 1s reaction.
+  Dialogue + major action must together fit within __TARGET__s.
+
+STEP 3 — write one flowing prompt per clip (150–220 words):
+  - Open with the exact visual state + location ref tag.
+  - Explicit timestamps [0s], [Xs] for every beat: shot change, action start, dialogue onset.
+  - Dialogue: 'at 4s Ruslan (@Image1) says: "..."'
+  - World-space directions only (toward the window, backing to the door). NEVER 'toward camera'.
+  - Close with the frozen visual state the next clip will open on.
+
+Return a JSON array of exactly 4 strings — the 4 prompts in scene order. No other keys.
+</script>
+
+<!-- ═══════════════════════════════════════════════
+     APP HTML
+════════════════════════════════════════════════ -->
+
+<div id="app">
+  <header>
+    <span class="brand">⬛ AI-MDF Lite</span>
+    <nav id="nav">
+      <button class="nav-btn active" data-tab="setup">1 · Настройки</button>
+      <button class="nav-btn" data-tab="cast">2 · Кастинг</button>
+      <button class="nav-btn" data-tab="screenplay">3 · Сценарий</button>
+      <button class="nav-btn" data-tab="quickplay">4 · Квик-плей</button>
+      <button class="nav-btn" data-tab="library">Библиотека</button>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- ── 1. SETUP ─────────────────────────────── -->
+    <section id="tab-setup" class="tab active">
+      <div class="setup-grid">
+        <div class="col">
+          <div class="card">
+            <div class="card-title">Текст истории</div>
+            <textarea id="story-text" class="mono" rows="28" placeholder="Вставьте текст вашего романа / истории…"></textarea>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <div class="card-title">Конфигурация</div>
+            <label>Эпизодов в серии</label>
+            <select id="cfg-episodes">
+              <option value="1">1 эпизод</option>
+              <option value="2">2 эпизода</option>
+              <option value="3" selected>3 эпизода (по умолчанию)</option>
+              <option value="5">5 эпизодов</option>
+            </select>
+            <label>Допустимое количество панелей (через запятую)</label>
+            <input type="text" id="cfg-panels" value="4,6,9,10,12">
+            <label>Длительность клипа квик-плея (секунды)</label>
+            <select id="cfg-clip-duration">
+              <option value="6">6s</option>
+              <option value="8">8s</option>
+              <option value="10" selected>10s</option>
+              <option value="15">15s</option>
+            </select>
+          </div>
+          <div class="card">
+            <div class="card-title">Шаблон стиля <span class="badge badge-blue">редактируемый</span></div>
+            <textarea id="style-text" class="mono" rows="12"></textarea>
+          </div>
+          <div class="card">
+            <div class="card-title">Шаблон сеттинга <span class="badge badge-blue">заполните {{placeholders}}</span></div>
+            <textarea id="setting-text" class="mono" rows="18"></textarea>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 2. CAST ─────────────────────────────── -->
+    <section id="tab-cast" class="tab">
+      <div class="section-row">
+        <span class="section-title">Шаг 2 — Кастинг персонажей</span>
+        <span id="cast-status" class="status">рефы не сохранены</span>
+      </div>
+      <div class="tip">Сгенерируйте промпт → скопируйте в чатбот (Claude, ChatGPT, Gemini) → вставьте JSON-ответ обратно.</div>
+      <br>
+      <div class="actions">
+        <button class="btn btn-primary" id="gen-casting-btn">Сгенерировать промпт</button>
+        <button class="btn" id="copy-casting-btn">Копировать промпт</button>
+      </div>
+      <br>
+      <div class="card">
+        <div class="card-title">Промпт</div>
+        <div id="casting-prompt" class="prompt-area" style="max-height:260px">(нажмите «Сгенерировать промпт» выше)</div>
+      </div>
+      <br>
+      <div class="card">
+        <div class="card-title">Вставьте ответ чатбота (JSON-массив рефов)</div>
+        <textarea id="casting-response" class="mono" rows="12" placeholder='[{"name":"...","type":"Character","visual_desc":"..."}]'></textarea>
+        <br>
+        <div class="actions">
+          <button class="btn btn-primary" id="parse-casting-btn">Разобрать и сохранить рефы</button>
+          <button class="btn btn-ghost" id="clear-refs-btn">Очистить все рефы</button>
+        </div>
+      </div>
+      <br>
+      <div id="casting-preview"></div>
+    </section>
+
+    <!-- ── 3. SCREENPLAY ──────────────────────── -->
+    <section id="tab-screenplay" class="tab">
+      <div class="section-row">
+        <span class="section-title">Шаг 3 — Сценарий (только эпизоды)</span>
+        <span id="screenplay-status" class="status">сценарий не сохранён</span>
+      </div>
+      <div class="tip">Генерирует промпт для разбивки на эпизоды. Требуется шаг кастинга (список персонажей).</div>
+      <br>
+      <div class="actions">
+        <button class="btn btn-primary" id="gen-screenplay-btn">Сгенерировать промпт</button>
+        <button class="btn" id="copy-screenplay-btn">Копировать промпт</button>
+      </div>
+      <br>
+      <div class="card">
+        <div class="card-title">Промпт</div>
+        <div id="screenplay-prompt" class="prompt-area" style="max-height:260px">(нажмите «Сгенерировать промпт» выше)</div>
+      </div>
+      <br>
+      <div class="card">
+        <div class="card-title">Вставьте ответ чатбота (JSON-объект)</div>
+        <textarea id="screenplay-response" class="mono" rows="12" placeholder='{"characters":[...],"episodes":[...]}'></textarea>
+        <br>
+        <div class="actions">
+          <button class="btn btn-primary" id="parse-screenplay-btn">Разобрать и сохранить сценарий</button>
+          <button class="btn btn-ghost" id="clear-screenplay-btn">Очистить сценарий</button>
+        </div>
+      </div>
+      <br>
+      <div id="screenplay-preview"></div>
+    </section>
+
+    <!-- ── 4. QUICK-PLAY ──────────────────────── -->
+    <section id="tab-quickplay" class="tab">
+      <div class="section-row">
+        <span class="section-title">Шаг 4 — Промпты квик-плея</span>
+        <span id="qp-status" class="status">сценарий не загружен</span>
+      </div>
+      <div class="tip">На каждую сцену: сгенерируйте промпт → отдайте чатботу → вставьте 4 клипа обратно. Загрузите PNG рефов в Библиотеку заранее — чатботу нужны они как вложения @Image.</div>
+      <br>
+      <div id="quickplay-scenes">
+        <div class="empty-state">Сначала загрузите сценарий на шаге 3.</div>
+      </div>
+    </section>
+
+    <!-- ── LIBRARY ────────────────────────────── -->
+    <section id="tab-library" class="tab">
+      <div class="section-row">
+        <span class="section-title">Библиотека рефов</span>
+        <div class="actions">
+          <button class="btn btn-sm" id="export-refs-btn">Экспорт JSON</button>
+          <button class="btn btn-sm" id="import-refs-btn">Импорт JSON</button>
+          <input type="file" id="import-refs-file" accept=".json">
+        </div>
+      </div>
+      <div id="library-grid" class="refs-grid">
+        <div class="empty-state" style="grid-column:1/-1">Выполните шаг кастинга, чтобы заполнить рефы.</div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ── REF DETAIL MODAL ── -->
+<div id="ref-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:100; overflow:auto; padding:40px 20px;">
+  <div style="max-width:680px; margin:0 auto; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:20px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <strong id="modal-title">Реф</strong>
+      <button class="btn btn-ghost btn-sm" id="modal-close">✕ Закрыть</button>
+    </div>
+    <div style="display:grid; grid-template-columns:140px 1fr; gap:16px;">
+      <div>
+        <div id="modal-thumb" style="width:140px; height:190px; background:var(--bg); border-radius:6px; border:1px solid var(--border); overflow:hidden; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:11px; cursor:pointer;" title="Click to upload PNG">
+          <span id="modal-thumb-hint">кликните для загрузки</span>
+        </div>
+        <input type="file" id="modal-img-file" accept="image/png,image/jpeg,image/webp">
+        <div style="margin-top:8px; font-size:11px; color:var(--muted);">PNG / JPG / WEBP</div>
+      </div>
+      <div>
+        <label>JSON (редактируемый)</label>
+        <textarea id="modal-json" class="mono" rows="18"></textarea>
+        <div style="margin-top:8px;" class="actions">
+          <button class="btn btn-primary btn-sm" id="modal-save">Сохранить</button>
+          <button class="btn btn-sm" style="color:var(--red);" id="modal-delete">Удалить реф</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ─────────────────────────────────────────────────────
+// TEMPLATES
+// ─────────────────────────────────────────────────────
+function tmpl(id) { return document.getElementById(id).textContent.trim(); }
+
+const TMPL = {
+  style:          tmpl('tmpl-style'),
+  setting:        tmpl('tmpl-setting'),
+  casting:        tmpl('tmpl-casting'),
+  screenplaySys:  tmpl('tmpl-screenplay-sys'),
+  screenplayEps:  tmpl('tmpl-screenplay-eps'),
+  quickplay:      tmpl('tmpl-quickplay'),
+};
+
+// ─────────────────────────────────────────────────────
+// STATE / STORAGE
+// ─────────────────────────────────────────────────────
+const NS = 'mdf:';
+function lsGet(k)    { try { return JSON.parse(localStorage.getItem(NS+k)); } catch { return null; } }
+function lsSet(k, v) { localStorage.setItem(NS+k, JSON.stringify(v)); }
+
+const state = {
+  refs:       lsGet('refs')       || [],
+  refImages:  lsGet('refImages')  || {},
+  screenplay: lsGet('screenplay') || null,
+  quickplay:  lsGet('quickplay')  || {},
+};
+
+function saveRefs()       { lsSet('refs',      state.refs); }
+function saveRefImages()  { lsSet('refImages', state.refImages); }
+function saveScreenplay() { lsSet('screenplay',state.screenplay); }
+function saveQuickplay()  { lsSet('quickplay', state.quickplay); }
+
+// Persisted textarea values
+function bindPersist(id, key, init) {
+  const el = document.getElementById(id);
+  const stored = localStorage.getItem(NS+'txt:'+key);
+  el.value = stored !== null ? stored : init;
+  el.addEventListener('input', () => localStorage.setItem(NS+'txt:'+key, el.value));
+}
+
+// ─────────────────────────────────────────────────────
+// TABS
+// ─────────────────────────────────────────────────────
+document.getElementById('nav').addEventListener('click', e => {
+  const btn = e.target.closest('.nav-btn');
+  if (!btn) return;
+  const name = btn.dataset.tab;
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b === btn));
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-'+name));
+  if (name === 'quickplay') renderQuickplay();
+  if (name === 'library')   renderLibrary();
+  if (name === 'cast')      renderCastingPreview();
+  if (name === 'screenplay') renderScreenplayPreview();
+});
+
+// ─────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────
+function el(id) { return document.getElementById(id); }
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    // brief flash feedback handled by caller
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+  });
+}
+
+function flashBtn(id, label='Скопировано!', ms=1500) {
+  const btn = el(id);
+  const orig = btn.textContent;
+  btn.textContent = label;
+  btn.disabled = true;
+  setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, ms);
+}
+
+function extractJSON(raw) {
+  // strip markdown code fences
+  let s = raw.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+  // find first [ or {
+  const fi = Math.min(
+    s.indexOf('[') === -1 ? Infinity : s.indexOf('['),
+    s.indexOf('{') === -1 ? Infinity : s.indexOf('{')
+  );
+  if (fi === Infinity) return JSON.parse(s);
+  const startChar = s[fi];
+  const endChar = startChar === '[' ? ']' : '}';
+  const li = s.lastIndexOf(endChar);
+  return JSON.parse(s.slice(fi, li+1));
+}
+
+function statusEl() {
+  const castEl = el('cast-status');
+  const spEl   = el('screenplay-status');
+  const qpEl   = el('qp-status');
+  if (castEl) {
+    const n = state.refs.length;
+    castEl.textContent = n ? `сохранено рефов: ${n}` : 'рефы не сохранены';
+    castEl.className = 'status ' + (n ? 'ok' : 'warn');
+  }
+  if (spEl) {
+    const ok = state.screenplay && state.screenplay.episodes;
+    spEl.textContent = ok ? `эпизодов: ${state.screenplay.episodes.length}` : 'сценарий не сохранён';
+    spEl.className = 'status ' + (ok ? 'ok' : 'warn');
+  }
+  if (qpEl) {
+    const ok = state.screenplay && state.screenplay.episodes;
+    const scenes = ok ? state.screenplay.episodes.reduce((a,e) => a + (e.scenes||[]).length, 0) : 0;
+    const saved = Object.keys(state.quickplay).length;
+    qpEl.textContent = ok ? `сцен: ${scenes}, с клипами: ${saved}` : 'сценарий не загружен';
+    qpEl.className = 'status ' + (ok ? 'ok' : 'warn');
+  }
+}
+
+// ─────────────────────────────────────────────────────
+// PROMPT BUILDERS
+// ─────────────────────────────────────────────────────
+function buildCastingPrompt() {
+  const style   = el('style-text').value;
+  const setting = el('setting-text').value;
+  const story   = el('story-text').value.trim();
+
+  return [
+    TMPL.casting,
+    '',
+    '---',
+    '## VISUAL STYLE',
+    style,
+    '',
+    '## WORLD SETTING',
+    setting,
+    '',
+    '---',
+    '## STORY TEXT',
+    story || '(no story text entered)',
+    '',
+    '---',
+    '## OUTPUT',
+    'Return a JSON array of reference objects. Each object must include:',
+    '  name, type (Character|Room|Vehicle|Outdoor|Object),',
+    '  visual_desc, video_visual_desc,',
+    '  behavioral_signature (characters), physical_vocabulary (characters),',
+    '  variations (array of variation slug names, empty for most),',
+    '  character_ref (null unless this is a variation),',
+    '  context (null unless variation), style_reference (null unless room/vehicle view or variation)',
+  ].join('\n');
+}
+
+function buildScreenplayPrompt() {
+  const episodes = parseInt(el('cfg-episodes').value, 10);
+  const panels   = el('cfg-panels').value.trim();
+  const style    = el('style-text').value;
+  const setting  = el('setting-text').value;
+  const story    = el('story-text').value.trim();
+
+  const approxMin = Math.round(episodes * 2 * 9 * 3 / 60);
+  const arcDur    = `~${episodes * 2 * 9 * 3}s (~${approxMin} min for ${episodes} eps × 2 scenes × 9 panels × 3s)`;
+
+  let epsTemplate = TMPL.screenplayEps
+    .replace(/__EPISODES_COUNT__/g, String(episodes))
+    .replace(/__PANEL_COUNT_OPTIONS__/g, panels)
+    .replace(/__ARC_DURATION__/g, arcDur);
+
+  const chars = state.refs
+    .filter(r => !r.character_ref)
+    .map(r => `  - ${r.name} [${r.type || 'Character'}]`).join('\n');
+
+  return [
+    '## PRODUCTION CONTEXT',
+    TMPL.screenplaySys,
+    '',
+    '---',
+    epsTemplate,
+    '',
+    '---',
+    '## VISUAL STYLE',
+    style,
+    '',
+    '## WORLD SETTING',
+    setting,
+    '',
+    '## CAST (from casting step)',
+    chars || '  (run casting step first to populate character list)',
+    '',
+    '---',
+    '## STORY TEXT',
+    story || '(no story text entered)',
+  ].join('\n');
+}
+
+function buildQuickplayPrompt(ep, scene) {
+  const target  = parseInt(el('cfg-clip-duration').value, 10);
+  const system  = TMPL.quickplay.replace(/__TARGET__/g, String(target));
+
+  const chars = ep.characters || state.refs
+    .filter(r => r.type === 'Character' && !r.character_ref)
+    .map(r => r.name);
+
+  const location = scene.location || ep.location || 'Location';
+  const refPairs = [...chars.map((c,i) => [c, `@Image${i+1}`]), [location, `@Image${chars.length+1}`]];
+  const refTable = refPairs.map(([n,t]) => `  ${n} → ${t}`).join('\n');
+
+  const bg = scene.background_activity || {};
+  const bgLine = bg.density && bg.density !== 'none'
+    ? `${bg.density} — ${bg.crowd_type || ''}`
+    : 'private, no extras';
+
+  return [
+    system,
+    '',
+    `SCENE: ${location} | ${ep.daytime || ''} | background: ${bgLine}`,
+    `INITIAL DISPOSITION: ${scene.initial_disposition || '—'}`,
+    '',
+    'REFERENCES (inject these tags inline in every prompt):',
+    refTable,
+    '',
+    'NARRATIVE (context only):',
+    (ep.rewritten_condensed_narrative || '').trim(),
+    '',
+    `STORYBOARD PANELS (${scene.panel_count || '?'} panels):`,
+    (scene.scene_instructions || '').trim(),
+    '',
+    'Return a JSON array of exactly 4 animation prompt strings.',
+  ].join('\n');
+}
+
+// ─────────────────────────────────────────────────────
+// CASTING STEP
+// ─────────────────────────────────────────────────────
+el('gen-casting-btn').addEventListener('click', () => {
+  const prompt = buildCastingPrompt();
+  el('casting-prompt').textContent = prompt;
+  el('casting-prompt')._cached = prompt;
+});
+
+el('copy-casting-btn').addEventListener('click', () => {
+  const text = el('casting-prompt')._cached || el('casting-prompt').textContent;
+  if (!text || text.startsWith('(нажмите')) { alert('Сначала сгенерируйте промпт.'); return; }
+  copyText(text);
+  flashBtn('copy-casting-btn');
+});
+
+el('parse-casting-btn').addEventListener('click', () => {
+  const raw = el('casting-response').value.trim();
+  if (!raw) { alert('Сначала вставьте ответ чатбота.'); return; }
+  let parsed;
+  try {
+    parsed = extractJSON(raw);
+  } catch (e) {
+    alert('Не удалось разобрать JSON: ' + e.message);
+    return;
+  }
+  const arr = Array.isArray(parsed) ? parsed : (parsed.refs || parsed.characters || parsed.cast || [parsed]);
+  if (!arr.length) { alert('Разобранный массив пуст.'); return; }
+  state.refs = arr;
+  saveRefs();
+  renderCastingPreview();
+  statusEl();
+  alert(`✅ Сохранено рефов: ${arr.length}.`);
+});
+
+el('clear-refs-btn').addEventListener('click', () => {
+  if (!confirm('Очистить все рефы и изображения?')) return;
+  state.refs = [];
+  state.refImages = {};
+  saveRefs();
+  saveRefImages();
+  renderCastingPreview();
+  statusEl();
+});
+
+function renderCastingPreview() {
+  const container = el('casting-preview');
+  if (!state.refs.length) { container.innerHTML = ''; statusEl(); return; }
+  const byType = {};
+  for (const r of state.refs) {
+    const t = r.type || 'Other';
+    (byType[t] = byType[t] || []).push(r);
+  }
+  let html = '';
+  for (const [type, typeRefs] of Object.entries(byType)) {
+    html += `<div class="card" style="margin-bottom:10px"><div class="card-title">${type} (${typeRefs.length})</div><div class="refs-grid" style="margin-top:8px">`;
+    for (const r of typeRefs) {
+      const img = state.refImages[r.name];
+      const thumb = img
+        ? `<img src="${img}" style="width:100%;height:100%;object-fit:cover;border-radius:4px">`
+        : `<div class="ref-thumb-placeholder" onclick="openRefModal(${JSON.stringify(r.name)})">+ PNG</div>`;
+      html += `<div class="ref-card">
+        <div style="width:100%;height:90px;overflow:hidden;border-radius:4px;background:var(--bg)">${thumb}</div>
+        <div class="ref-card-name">${r.name}</div>
+        <div class="ref-card-type">${r.type || '?'} ${r.character_ref ? `<span class="tag">вариация: ${r.character_ref}</span>` : ''}</div>
+        <div class="ref-card-desc">${(r.visual_desc||'').slice(0,120)}…</div>
+        <button class="btn btn-ghost btn-sm" onclick="openRefModal(${JSON.stringify(r.name)})">Редактировать / PNG</button>
+      </div>`;
+    }
+    html += '</div></div>';
+  }
+  container.innerHTML = html;
+  statusEl();
+}
+
+// ─────────────────────────────────────────────────────
+// SCREENPLAY STEP
+// ─────────────────────────────────────────────────────
+el('gen-screenplay-btn').addEventListener('click', () => {
+  const prompt = buildScreenplayPrompt();
+  el('screenplay-prompt').textContent = prompt;
+  el('screenplay-prompt')._cached = prompt;
+});
+
+el('copy-screenplay-btn').addEventListener('click', () => {
+  const text = el('screenplay-prompt')._cached || el('screenplay-prompt').textContent;
+  if (!text || text.startsWith('(нажмите')) { alert('Сначала сгенерируйте промпт.'); return; }
+  copyText(text);
+  flashBtn('copy-screenplay-btn');
+});
+
+el('parse-screenplay-btn').addEventListener('click', () => {
+  const raw = el('screenplay-response').value.trim();
+  if (!raw) { alert('Сначала вставьте ответ чатбота.'); return; }
+  let parsed;
+  try {
+    parsed = extractJSON(raw);
+  } catch (e) {
+    alert('Не удалось разобрать JSON: ' + e.message);
+    return;
+  }
+  if (!parsed.episodes && !Array.isArray(parsed)) { alert('Ожидается JSON с массивом "episodes".'); return; }
+  if (Array.isArray(parsed)) { parsed = { episodes: parsed }; }
+  state.screenplay = parsed;
+  saveScreenplay();
+  renderScreenplayPreview();
+  renderQuickplay();
+  statusEl();
+  const epCount = (parsed.episodes||[]).length;
+  alert(`✅ Сценарий сохранён: эпизодов ${epCount}.`);
+});
+
+el('clear-screenplay-btn').addEventListener('click', () => {
+  if (!confirm('Очистить сохранённый сценарий?')) return;
+  state.screenplay = null;
+  saveScreenplay();
+  renderScreenplayPreview();
+  renderQuickplay();
+  statusEl();
+});
+
+function renderScreenplayPreview() {
+  const container = el('screenplay-preview');
+  if (!state.screenplay || !state.screenplay.episodes) {
+    container.innerHTML = '';
+    statusEl();
+    return;
+  }
+  let html = '';
+  for (const ep of state.screenplay.episodes) {
+    const scenes = ep.scenes || [];
+    html += `<div class="ep-card">
+      <div class="ep-card-header">
+        <span class="ep-title">Эпизод ${ep.episode_id}</span>
+        <span class="badge badge-blue">${ep.episode_type || 'pov'}</span>
+        ${ep.pov_character ? `<span class="tag">POV: ${ep.pov_character}</span>` : ''}
+        <span class="muted">${ep.location || ''} · ${ep.daytime || ''}</span>
+      </div>
+      ${ep.rewritten_condensed_narrative ? `<div style="font-size:12px;color:var(--muted);margin-bottom:8px">${ep.rewritten_condensed_narrative.slice(0,200)}…</div>` : ''}
+      ${scenes.map(s => `<div class="scene-block">
+        <div class="scene-meta">
+          <span>Сцена ${s.scene_local_id}</span>
+          <span>${s.location || ''}</span>
+          <span class="badge badge-orange">${s.panel_count || '?'} panels</span>
+          ${s.background_activity ? `<span>bg: ${s.background_activity.density||'?'}</span>` : ''}
+        </div>
+        ${s.initial_disposition ? `<div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-family:var(--mono)">${s.initial_disposition.slice(0,200)}</div>` : ''}
+        <div class="scene-instructions">${(s.scene_instructions||'').slice(0,600)}${(s.scene_instructions||'').length>600?'…':''}</div>
+      </div>`).join('')}
+    </div>`;
+  }
+  container.innerHTML = html;
+  statusEl();
+}
+
+// ─────────────────────────────────────────────────────
+// QUICK-PLAY STEP
+// ─────────────────────────────────────────────────────
+function renderQuickplay() {
+  const container = el('quickplay-scenes');
+  statusEl();
+  if (!state.screenplay || !state.screenplay.episodes) {
+    container.innerHTML = '<div class="empty-state">Сначала загрузите сценарий на шаге 3.</div>';
+    return;
+  }
+
+  let html = '';
+  for (const ep of state.screenplay.episodes) {
+    for (const scene of (ep.scenes || [])) {
+      const sceneId = `e${String(ep.episode_id).padStart(3,'0')}s${scene.scene_local_id}`;
+      const clips   = state.quickplay[sceneId];
+      const hasClips = clips && clips.length;
+
+      html += `<div class="scene-card" id="sc-${sceneId}">
+        <div class="scene-card-header">
+          <div>
+            <span class="scene-card-title">Эп ${ep.episode_id} · Сцена ${scene.scene_local_id}</span>
+            <span class="tag" style="margin-left:8px">${scene.location || ep.location || ''}</span>
+            <span class="badge ${hasClips ? 'badge-green' : 'badge-orange'}" style="margin-left:6px">${hasClips ? `клипов: ${clips.length}` : 'клипов нет'}</span>
+          </div>
+          <div class="actions">
+            <button class="btn btn-primary btn-sm" onclick="genQPPrompt(${JSON.stringify(ep.episode_id)}, ${JSON.stringify(scene.scene_local_id)})">Сгенерировать промпт</button>
+            <button class="btn btn-sm" onclick="copyQPPrompt(${JSON.stringify(sceneId)})">Копировать</button>
+          </div>
+        </div>
+        <div id="qp-prompt-${sceneId}" class="prompt-area" style="max-height:200px;display:none"></div>
+        <div style="margin-top:10px">
+          <label>Вставьте ответ чатбота (JSON-массив из 4 строк)</label>
+          <textarea id="qp-resp-${sceneId}" class="mono" rows="6" placeholder='["промпт клипа 1...","клип 2...","клип 3...","клип 4..."]'>${clips ? JSON.stringify(clips, null, 2) : ''}</textarea>
+          <div class="actions" style="margin-top:6px">
+            <button class="btn btn-sm btn-primary" onclick="saveQPClips(${JSON.stringify(sceneId)})">Сохранить клипы</button>
+          </div>
+        </div>
+        ${hasClips ? renderClips(clips, sceneId) : ''}
+      </div>`;
+    }
+  }
+
+  container.innerHTML = html;
+}
+
+function genQPPrompt(epId, sceneId) {
+  const ep    = state.screenplay.episodes.find(e => e.episode_id == epId);
+  if (!ep) return;
+  const scene = (ep.scenes||[]).find(s => s.scene_local_id == sceneId);
+  if (!scene) return;
+  const scId  = `e${String(epId).padStart(3,'0')}s${sceneId}`;
+  const prompt = buildQuickplayPrompt(ep, scene);
+  const promptEl = el(`qp-prompt-${scId}`);
+  promptEl.textContent = prompt;
+  promptEl._cached = prompt;
+  promptEl.style.display = 'block';
+}
+
+function copyQPPrompt(sceneId) {
+  const promptEl = el(`qp-prompt-${sceneId}`);
+  const text = promptEl && (promptEl._cached || promptEl.textContent);
+  if (!text) { alert('Сначала сгенерируйте промпт.'); return; }
+  copyText(text);
+}
+
+function saveQPClips(sceneId) {
+  const raw = (el(`qp-resp-${sceneId}`) || {}).value || '';
+  if (!raw.trim()) { alert('Сначала вставьте ответ чатбота.'); return; }
+  let parsed;
+  try {
+    parsed = extractJSON(raw.trim());
+  } catch(e) {
+    alert('Не удалось разобрать JSON: ' + e.message);
+    return;
+  }
+  const arr = Array.isArray(parsed) ? parsed : [parsed];
+  state.quickplay[sceneId] = arr;
+  saveQuickplay();
+  renderQuickplay();
+  statusEl();
+  alert(`✅ Сохранено клипов: ${arr.length} для ${sceneId}.`);
+}
+
+function renderClips(clips, sceneId) {
+  const refs = buildRefList(sceneId);
+  let html = '<div class="clips-list">';
+  clips.forEach((c, i) => {
+    html += `<div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Клип ${i+1}${refs.length ? ' — загрузите рефы: '+refs.join(', ') : ''}</div>
+      <div class="clip-item">${escHtml(c)}</div>
+    </div>`;
+  });
+  html += '</div>';
+  return html;
+}
+
+function buildRefList(sceneId) {
+  const m = sceneId.match(/^e(\d+)s(\d+)$/);
+  if (!m || !state.screenplay) return [];
+  const ep    = state.screenplay.episodes.find(e => e.episode_id == parseInt(m[1]));
+  if (!ep) return [];
+  const scene = (ep.scenes||[]).find(s => s.scene_local_id == parseInt(m[2]));
+  const chars = ep.characters || state.refs.filter(r=>r.type==='Character'&&!r.character_ref).map(r=>r.name);
+  const loc   = (scene && scene.location) || ep.location || '';
+  return [...chars.map((c,i)=>`${c}=@Image${i+1}`), loc && `${loc}=@Image${chars.length+1}`].filter(Boolean);
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ─────────────────────────────────────────────────────
+// LIBRARY
+// ─────────────────────────────────────────────────────
+function renderLibrary() {
+  const grid = el('library-grid');
+  if (!state.refs.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">Выполните шаг кастинга, чтобы заполнить рефы.</div>';
+    return;
+  }
+  let html = '';
+  for (const r of state.refs) {
+    const img = state.refImages[r.name];
+    html += `<div class="ref-card">
+      ${img
+        ? `<div style="height:160px;overflow:hidden;border-radius:4px"><img src="${img}" style="width:100%;height:100%;object-fit:cover"></div>`
+        : `<div class="ref-thumb-placeholder" onclick="openRefModal(${JSON.stringify(r.name)})">+ Загрузить PNG</div>`
+      }
+      <div class="ref-card-name">${r.name}</div>
+      <div class="ref-card-type">${r.type||'?'}${r.character_ref ? ` · вариация: ${r.character_ref}` : ''}</div>
+      <div class="ref-card-desc">${(r.visual_desc||'').slice(0,100)}…</div>
+      <button class="btn btn-ghost btn-sm" onclick="openRefModal(${JSON.stringify(r.name)})">Редактировать / Загрузить</button>
+    </div>`;
+  }
+  grid.innerHTML = html;
+}
+
+// ─────────────────────────────────────────────────────
+// REF MODAL
+// ─────────────────────────────────────────────────────
+let _modalRefName = null;
+
+function openRefModal(name) {
+  _modalRefName = name;
+  const ref = state.refs.find(r => r.name === name) || { name };
+  el('modal-title').textContent = name;
+  el('modal-json').value = JSON.stringify(ref, null, 2);
+  const img = state.refImages[name];
+  const thumb = el('modal-thumb');
+  if (img) {
+    thumb.innerHTML = `<img src="${img}" style="width:100%;height:100%;object-fit:cover;border-radius:4px">`;
+  } else {
+    thumb.innerHTML = '<span id="modal-thumb-hint">кликните для загрузки</span>';
+  }
+  el('ref-modal').style.display = 'block';
+}
+
+el('modal-close').addEventListener('click', () => {
+  el('ref-modal').style.display = 'none';
+  _modalRefName = null;
+});
+
+el('ref-modal').addEventListener('click', e => {
+  if (e.target === el('ref-modal')) { el('ref-modal').style.display = 'none'; _modalRefName = null; }
+});
+
+el('modal-thumb').addEventListener('click', () => el('modal-img-file').click());
+
+el('modal-img-file').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file || !_modalRefName) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    state.refImages[_modalRefName] = ev.target.result;
+    saveRefImages();
+    el('modal-thumb').innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:4px">`;
+    renderLibrary();
+    renderCastingPreview();
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+});
+
+el('modal-save').addEventListener('click', () => {
+  let parsed;
+  try {
+    parsed = JSON.parse(el('modal-json').value);
+  } catch(e) {
+    alert('Неверный JSON: ' + e.message);
+    return;
+  }
+  const idx = state.refs.findIndex(r => r.name === _modalRefName);
+  if (idx >= 0) {
+    state.refs[idx] = parsed;
+  } else {
+    state.refs.push(parsed);
+  }
+  // handle rename
+  if (parsed.name && parsed.name !== _modalRefName && state.refImages[_modalRefName]) {
+    state.refImages[parsed.name] = state.refImages[_modalRefName];
+    delete state.refImages[_modalRefName];
+    saveRefImages();
+  }
+  saveRefs();
+  el('ref-modal').style.display = 'none';
+  _modalRefName = null;
+  renderLibrary();
+  renderCastingPreview();
+  statusEl();
+  alert('✅ Реф сохранён.');
+});
+
+el('modal-delete').addEventListener('click', () => {
+  if (!confirm(`Удалить реф "${_modalRefName}"?`)) return;
+  state.refs = state.refs.filter(r => r.name !== _modalRefName);
+  delete state.refImages[_modalRefName];
+  saveRefs();
+  saveRefImages();
+  el('ref-modal').style.display = 'none';
+  _modalRefName = null;
+  renderLibrary();
+  renderCastingPreview();
+  statusEl();
+});
+
+// ─────────────────────────────────────────────────────
+// EXPORT / IMPORT
+// ─────────────────────────────────────────────────────
+el('export-refs-btn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(state.refs, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'refs.json';
+  a.click();
+});
+
+el('import-refs-btn').addEventListener('click', () => el('import-refs-file').click());
+
+el('import-refs-file').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const arr = JSON.parse(ev.target.result);
+      if (!Array.isArray(arr)) throw new Error('Ожидается JSON-массив');
+      state.refs = arr;
+      saveRefs();
+      renderLibrary();
+      renderCastingPreview();
+      statusEl();
+      alert(`✅ Импортировано рефов: ${arr.length}.`);
+    } catch(e) {
+      alert('Импорт не удался: ' + e.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+// ─────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────
+bindPersist('story-text',   'story',   '');
+bindPersist('style-text',   'style',   TMPL.style);
+bindPersist('setting-text', 'setting', TMPL.setting);
+bindPersist('cfg-episodes', 'cfgEp',   '3');
+bindPersist('cfg-panels',   'cfgPan',  '4,6,9,10,12');
+
+// cfg-episodes and cfg-panels are <select>/<input> — bindPersist works for them too
+// but select needs value assignment after options are in DOM — handled above.
+
+renderCastingPreview();
+renderScreenplayPreview();
+statusEl();
+</script>
+</body>
+</html>
