@@ -23,12 +23,13 @@
 
     /* ── Layout ── */
     #app { display: flex; flex-direction: column; height: 100vh; }
-    header { display: flex; align-items: center; gap: 16px; padding: 0 20px; height: 48px; border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
+    header { display: flex; align-items: center; gap: 10px; padding: 0 16px; height: 48px; border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink: 0; flex-wrap: nowrap; overflow: hidden; }
     .brand { font-weight: 700; font-size: 15px; color: var(--accent); white-space: nowrap; }
-    nav { display: flex; gap: 4px; overflow-x: auto; }
-    .nav-btn { background: none; border: none; color: var(--muted); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; white-space: nowrap; }
+    nav { display: flex; gap: 2px; overflow-x: auto; flex-shrink: 1; }
+    .nav-btn { background: none; border: none; color: var(--muted); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 13px; white-space: nowrap; }
     .nav-btn:hover { background: rgba(255,255,255,.06); color: var(--text); }
     .nav-btn.active { background: rgba(88,166,255,.15); color: var(--accent); }
+    .hdr-spacer { flex: 1; min-width: 4px; }
     main { flex: 1; overflow: hidden; }
     .tab { display: none; height: 100%; overflow: auto; padding: 16px 20px; }
     .tab.active { display: block; }
@@ -56,6 +57,7 @@
     /* ── Buttons ── */
     .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; font-size: 13px; font-weight: 500; background: var(--surface); color: var(--text); }
     .btn:hover { background: rgba(255,255,255,.08); }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
     .btn-primary { background: var(--accent); color: #0d1117; border-color: var(--accent); }
     .btn-primary:hover { opacity: .9; }
     .btn-sm { padding: 4px 10px; font-size: 12px; }
@@ -73,18 +75,16 @@
 
     /* ── Chips / badges ── */
     .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
-    .badge-blue { background: rgba(88,166,255,.15); color: var(--accent); }
-    .badge-green { background: rgba(63,185,80,.15); color: var(--green); }
+    .badge-blue   { background: rgba(88,166,255,.15); color: var(--accent); }
+    .badge-green  { background: rgba(63,185,80,.15);  color: var(--green);  }
     .badge-orange { background: rgba(210,153,34,.15); color: var(--orange); }
 
     /* ── Refs / Library ── */
-    .refs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; margin-top: 12px; }
+    .refs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-top: 12px; }
     .ref-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
     .ref-card-name { font-weight: 600; font-size: 13px; }
     .ref-card-type { font-size: 11px; color: var(--muted); }
-    .ref-card-desc { font-size: 12px; color: var(--muted); max-height: 60px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
-    .ref-thumb { width: 100%; height: 120px; object-fit: cover; border-radius: 4px; background: var(--bg); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 11px; }
-    .ref-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
+    .ref-card-desc { font-size: 12px; color: var(--muted); max-height: 60px; overflow: hidden; }
     .ref-thumb-placeholder { width: 100%; height: 120px; background: var(--bg); border-radius: 4px; border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 11px; cursor: pointer; }
     .ref-thumb-placeholder:hover { border-color: var(--accent); color: var(--accent); }
     input[type=file] { display: none; }
@@ -104,19 +104,25 @@
     .scene-meta { font-size: 11px; color: var(--muted); display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
     .scene-instructions { font-size: 12px; font-family: var(--mono); white-space: pre-wrap; max-height: 180px; overflow: auto; color: var(--muted); }
 
+    /* ── Validation errors ── */
+    .val-box { margin-top: 8px; }
+    .val-box ul { margin: 4px 0 0 16px; }
+    .val-box li { margin-bottom: 2px; }
+
     /* ── Misc ── */
     .row { display: flex; gap: 10px; align-items: center; }
     .spacer { flex: 1; }
     .status { font-size: 12px; color: var(--muted); }
-    .status.ok { color: var(--green); }
+    .status.ok   { color: var(--green); }
     .status.warn { color: var(--orange); }
     hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     .empty-state { text-align: center; padding: 40px; color: var(--muted); font-size: 13px; }
     .tip { font-size: 12px; color: var(--muted); padding: 10px 12px; background: rgba(88,166,255,.08); border-left: 3px solid var(--accent); border-radius: 0 6px 6px 0; }
     .json-view { font-family: var(--mono); font-size: 11px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px; overflow: auto; white-space: pre-wrap; max-height: 250px; }
     .tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 11px; background: rgba(255,255,255,.07); color: var(--muted); font-family: var(--mono); }
-    .section-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .section-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
     .section-title { font-size: 14px; font-weight: 600; }
+    .tmpl-card-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   </style>
 </head>
 <body>
@@ -459,326 +465,212 @@ SELF-AUDIT before finalizing:
 </script>
 
 <script type="text/plain" id="tmpl-quickplay">
-# DYNAMICS CORE: 4-PROMPT VERTICAL MICRODRAMA GUIDE
+# VERTICAL MICRODRAMA VIDEO PROMPT GUIDE
 
-## 1. CORE DIRECTIVES & OUTPUT
-- **Role**: Prompt Engineer translating story beats → 4 sequential video prompts (Seedance / Kling / Grok).
-- **Output**: Exactly 4 prompts. Full narrative arc coverage (episodic jump-cuts).
+## 1. ROLE & OUTPUT
 
-- **Clip Duration**: Each prompt generates a **10–15 second continuous clip**.
-- **Format**: Vertical 9:16. Real-time pacing (no montage compression).
-
-- **Constant Change Law**:
-  No continuous stillness >2s.
-  Micro-motion (breath, weight shift, finger tension) counts as motion.
-  ≥2s static with no visible change = viewer swipe risk.
-
-- **One Shot, One Scale**:
-  Never combine incompatible scales. ECU face + floor detail = HARD FAILURE.
-
-- **LOCATION JUMPS**:
-  Different location = Start of new prompt.
-  Teleportation is permitted *between* prompts to advance the story.
-  Internal motion (0-15s) must remain physically anchored and continuous.
+- **Role**: Prompt engineer translating story beats → 4 sequential video prompts (Seedance / Kling / Grok).
+- **Output**: Exactly 4 prompts covering the full scene arc in order.
+- **Format**: Vertical 9:16. Real-time pacing — no montage compression.
+- **Clip length**: __TARGET__s continuous per prompt.
 
 ---
 
-## 2. STRICT OUTPUT FORMAT (NON-NEGOTIABLE)
+## 2. LAWS OF MOTION
+
+- **Constant Change**: no stillness > 2s. Micro-motion (breath, weight shift, finger tension) counts. ≥ 2s frozen = swipe risk.
+- **One Shot, One Scale**: never mix incompatible scales. ECU face + floor detail = HARD FAILURE.
+- **Location Lock**: teleportation allowed *between* prompts only. Within a prompt, motion must stay physically anchored.
+
+---
+
+## 3. OUTPUT FORMAT
 
 Return EXACTLY:
+
 ```json
 [
-  "Prompt 1 (10–15s continuous clip)",
-  "Prompt 2 (10–15s continuous clip)",
-  "Prompt 3 (10–15s continuous clip)",
-  "Prompt 4 (10–15s continuous clip)"
+  "Prompt 1 (__TARGET__s continuous)",
+  "Prompt 2 (__TARGET__s continuous)",
+  "Prompt 3 (__TARGET__s continuous)",
+  "Prompt 4 (__TARGET__s continuous)"
 ]
-````
+```
 
 Rules:
-
-* No extra keys
-* No explanations
-* No markdown outside JSON
-* Each string = ONE continuous prompt (150–300 words recommended)
-* Prompts MUST be self-contained but **state-continuous**
+- No extra keys, no explanations, no markdown outside the JSON
+- Each string = one continuous clip (150–300 words)
+- Prompts must be self-contained but state-continuous
 
 ---
 
-## 3. THE DRAMA ENGINE (References, Gaze, Action, Dialogue)
+## 4. DRAMA ENGINE
 
-### 🔹 Reference Injection
+### Reference Injection
 
-* First mention per prompt: `CharacterName (@ImageRef1)`
-* Props/Stakes: `PropName (@PropRefA)`
-* Keep tags inline. Never dump a reference table.
-* Props persist across prompts unless explicitly moved or removed.
+- First mention per prompt: `CharacterName (@ImageRef1)`
+- Props: `PropName (@PropRefA)`
+- Tags inline only — never dump a reference table
+- Props persist across prompts unless explicitly moved or removed
 
----
+### Gaze Contract
 
-### 🔹 Gaze Target Contract
+Every multi-actor prompt MUST state:
+`GAZE_TARGET: [Ref1] → [Person/Anchor], [Ref2] → [Person/Anchor]`
 
-* Every multi-actor prompt MUST explicitly state:
-  `GAZE_TARGET: [Ref1] → [Named Person/Anchor], [Ref2] → [Named Person/Anchor]`
+- FRONTAL profile + sideways gaze = CONTRADICTION; gaze must match head orientation
+- **POV Law**: `[Ref]'s POV` = that character cannot appear in frame; use over-the-shoulder if they must be visible
+- Missing or contradictory GAZE_TARGET = HARD FAILURE
 
-* `FRONTAL` profile + looking sideways = CONTRADICTION.
+### Physical Action
 
-* Gaze MUST match head orientation.
+Use ONLY mechanical verbs: `grips`, `steps`, `pivots`, `extends`, `presses`, `drops`, `reaches`, `releases`, `leans`, `pulls`, `tilts`.
 
-* **POV Law**:
-  `[Ref]'s POV` = that character CANNOT appear in frame.
-  If visibility required → use over-the-shoulder.
+FORBIDDEN: emotional verbs (`hesitates`, `breaks`) and metaphors (`iron grip`, `pins her`).
 
-* Missing or contradictory `GAZE_TARGET` = HARD FAILURE.
+Encode via anatomy + measurement: `jaw tension 2mm`, `shoulders drop 3cm`, `weight shifts 4cm to right foot`.
 
----
+### Directional Lock
 
-### 🔹 Physical Action Architecture
+FORBIDDEN: `forward`, `backward`, `away`, `toward camera`, `closer`.
 
-* Use ONLY mechanical verbs:
-  `grips`, `steps`, `pivots`, `extends`, `presses`, `drops`, `reaches`, `releases`, `leans`, `pulls`, `tilts`.
+Must resolve to a named anchor or character:
+- `steps 20cm toward [entrance-door]`
+- `leans toward [Anna] across [glass-table]`
 
-* **FORBIDDEN**:
+### Dialogue Budget
 
-  * Emotional verbs (`hesitates`, `breaks`)
-  * Metaphors (`iron grip`, `pins her`)
-
-* Encode via anatomy + measurement:
-  `jaw tension 2mm`, `shoulders drop 3cm`, `weight shifts 4cm to right foot`
-
----
-
-### 🔹 Directional Lock
-
-* NO:
-  `forward`, `backward`, `away`, `toward camera`, `closer`
-
-* MUST resolve to:
-
-  * anchor OR
-  * named character
-
-Examples:
-
-* `steps 20cm toward [entrance-door]`
-* `leans toward [Anna] across [glass-table]`
+- ≤ 8 words per line; ~24 characters/sec combined (dialogue + VO)
+- At least **3 of 4 prompts** must contain dialogue or voiceover
+- Silent prompts allowed only if physical tension escalates in place of speech
+- Inner monologue: 4–5 words only, never narrates visible action
 
 ---
 
-### 🔹 Dialogue & Voice Budget
+## 5. MOTION LAWS
 
-* ≤8 words per line
+### Living Pose (Anti-Tableau)
 
-* ~24 characters/sec combined (dialogue + VO)
+Humans are never fully still. No character unchanged > 2s.
 
-* At least **3 of 4 prompts** MUST contain dialogue or voiceover
+Micro-motion: weight shift (2–5cm), head tilt (3–8°), finger pressure, chest rise (1–2cm).
 
-* Silent prompts allowed ONLY if physical tension escalates
+Use `CONCURRENT:` for non-speaking actors.
 
-* Inner monologue:
+### Action-Reaction & Open Threads
 
-  * 4–5 words only
-  * never narrates visible action
+- Micro-actions complete inside the prompt; outcomes carry to the next
+- **Open Thread Rule**: Prompt N+1 must resolve Prompt N's ending within its first 0–1s
 
----
+### Temporal Structure (__TARGET__s per clip)
 
-## 4. MOTION & DYNAMICS LAWS
+- **0s–__T1__s**: establish + micro-tension
+- **__T1__s–__T2__s**: primary action
+- **__T2__s–__T3__s**: escalation or reaction
+- **__T3__s–__TARGET__s**: tension hold / unstable end
 
-### 🔹 Narrative Density
-Limit animation to 10 seconds of screen actions per prompt to ensure full story coverage.
+### Narrative Density
 
-### 🔹 Living Pose Law (Anti-Tableau)
+Budget narrative to __TARGET__s — assign a timestamp to every beat to avoid over-packing the clip.
 
-* Humans are NEVER fully still
+### Motion Rhythm
 
-* No character may remain unchanged >2s
-
-* Micro-motion examples:
-
-  * weight shift (2–5cm)
-  * head tilt (3–8°)
-  * finger pressure
-  * chest rise (1–2cm)
-
-* Use `CONCURRENT:` for non-speaking actors
+Avoid mixing fast and slow phases within one prompt. Keep rhythm consistent per clip.
 
 ---
 
-### 🔹 Action-Then-Reaction & Open Threads
+## 6. SPATIAL RULES (9:16)
 
-* Micro-actions COMPLETE inside prompt
+### State Continuity (Jump Lock)
 
-* Outcomes carry to next prompt
+Character ends Prompt N at [location A] holding [prop] → must begin Prompt N+1 at [location B] in the same pose/grip.
 
-* **Open Thread Rule**:
-  Prompt N+1 must resolve Prompt N ending in first 0–1s
+### Anchor Topology
 
----
+Use ONLY named anchors: `[sofa]`, `[door]`, `[table]`.
 
-### 🔹 Temporal Structure for 10–15s Clips
+Format: `"[anchor], [distance] toward [anchor2] from [Actor]"`
 
-Each prompt should internally follow:
+FORBIDDEN: compass directions, vague positions, absolute coordinates.
 
-* **0–3s**: Establish + micro-tension
-* **3–7s**: Primary action
-* **7–11s**: escalation or reaction
-* **11–15s**: tension hold / unstable end
+### Scale & Frame Exclusion
 
----
+- **ECU (~30cm)**: subject only
+- **CU (~1m)**: subject + actors within 1m
+- **MS (~3–4m)**: group allowed
+- At CU/ECU: no background actions; off-frame actors = no motion
 
-### 🔹 Motion Consistency
+### Prop Continuity
 
-* Avoid mixing fast and slow motion phases in same prompt
-* Keep motion rhythm consistent per clip
+Props persist across prompts. Position must match previous end state. Removal requires explicit action.
 
----
+### Content Filters
 
-## 5. SPATIAL TOPOLOGY & AI CONSTRAINTS (9:16)
+FORBIDDEN: sweat, tears, vapor, breath fog, saliva.
 
-### 🔹 State Continuity (The Jump Lock)
-  If a character ends Prompt N at [location A] with [prop], they must begin Prompt N+1 at [location B] maintaining the same pose/grip.
+Encode breathing mechanically: `chest drops 1cm`, `shoulders settle 2cm`.
 
-### 🔹 Anchor Topology
+Facial expressions: micro only, no sustained extremes. No complete stillness — always include micro-motion (`fingers flex`, `chest rises`).
 
-* Use ONLY named anchors:
-  `[sofa]`, `[door]`, `[table]`
+### Vertical Framing
 
-* Format:
-  `"[anchor], [distance] toward [anchor2] from [Actor]"`
+Faces dominate. Safe zone: middle 65% of frame height.
 
-* **FORBIDDEN**:
-  compass directions
-  vague positions
-  absolute coordinates
+### 180° Rule
 
----
+Camera axis consistent across prompts. Flip only if actor crosses the scene midpoint.
 
-### 🔹 Scale & Frame Exclusion
+### Frame Density
 
-* **ECU (~30cm)**:
-  subject only
+Max 2 major actions per prompt. Others = micro-motion only.
 
-* **CU (~1m)**:
-  subject + ≤1m actors
+### 9:16 Optical Constraints
 
-* **MS (~3–4m)**:
-  group allowed
-
-* At CU/ECU:
-  NO background actions
-  OFF-FRAME = no motion
+- **Mirror Law**: mirrors/reflections valid only at CU/ECU
+- **Two-Shot Rule**: use "Profile Two-Shot" for side-by-side actors
+- **Vertical Stacking**: place [Ref1] at top-frame and [Ref2] at bottom-frame to maximize scale
+- **Forbidden angles**: back-seat OTS toward center-dash; ECU of eyes + MS of body (Scale Salad)
 
 ---
 
-### 🔹 Prop Continuity Lock
-
-* Props persist across prompts
-* Position must match previous end state
-* Removal requires explicit action
-
----
-
-### 🔹 Content Filters
-
-* NO:
-  sweat, tears, vapor, breath fog, saliva
-
-* Encode breathing mechanically:
-  `chest drops 1cm`, `shoulders settle 2cm`
-
-* Facial expressions:
-  micro only, no sustained extremes
-
----
-
-### 🔹 Dead Body Rule
-
-* No complete stillness
-* Must include micro-motion:
-  `fingers flex`, `chest rises`, etc.
-
----
-
-### 🔹 Vertical Framing
-
-* Faces dominate
-* Safe zone:
-  middle 65%
-
----
-
-### 🔹 180° Rule
-
-* Camera axis consistent across prompts
-* Flip ONLY if actor crosses scene midpoint
-
----
-
-### 🔹 Frame Density Control
-
-* Max 2 major actions per prompt
-* Others = micro-motion
-
-### 🔹 9:16 Optical Physics Lock
-* **Mirror Law**: Mirrors/Reflections are only valid in CU/ECU.
-* **Two-Shot Rule**: Use "Profile Two-Shot" for passenger/driver interactions.
-* **Vertical Stacking**: In 9:16, prioritize Y-axis relationships. Place [Ref1] at top-frame and [Ref2] at bottom-frame to maximize scale.
-* **Forbidden Angles**:
-  - Back-seat OTS toward center-dash (too wide for 9:16).
-  - ECU of eyes + MS of body (Scale Salad).
-
----
-
-## 6. PROMPT TEMPLATE (10–15s)
+## 7. PROMPT TEMPLATE
 
 ```
 [0s] STATE: [RefA] (@Image1) at [desk], right hand grips [folder] (@Prop1).
 [RefB] (@Image2) 1m away, arms crossed.
 GAZE_TARGET: [RefA] → [folder], [RefB] → [RefA]
 
-[0s–3s]: micro-motion phase
-[3s–7s]: primary action
-[7s–11s]: reaction/escalation
-[11s–15s]: unstable tension hold
+[0s–__T1__s]: micro-motion phase
+[__T1__s–__T2__s]: primary action
+[__T2__s–__T3__s]: reaction/escalation
+[__T3__s–__TARGET__s]: unstable tension hold
 
-CONCURRENT: secondary actor motion
+CONCURRENT: [RefB] shifts weight 3cm toward [RefA], jaw tightens.
 
-Dialogue inline:
 at 4s [RefB]: "You shouldn't be here."
 ```
 
----
-
-### 🔹 Final Frame Rule (Tension Lock)
-
-* Must end on unstable moment:
-
-  * incomplete action OR
-  * peak tension hold
-
-* FORBIDDEN:
-  relaxed states
-  neutral standing
+**Final Frame Rule**: must end on incomplete action or peak tension hold. FORBIDDEN: relaxed states, neutral standing.
 
 ---
 
-## 7. PRE-FLIGHT AUDIT CHECKLIST
+## 8. PRE-FLIGHT CHECKLIST
 
-* [ ] Exactly 4 prompts?
-* [ ] Valid JSON output only?
-* [ ] Each prompt 10–15s continuous?
-* [ ] No teleportation?
-* [ ] Anchored movement only?
-* [ ] No character static >2s?
-* [ ] Open thread continuity respected?
-* [ ] CU/ECU rules respected?
-* [ ] Ends unstable?
-* [ ] No forbidden visuals?
-* [ ] GAZE_TARGET valid?
-* [ ] ≥3 prompts include dialogue/VO?
-* [ ] References injected correctly?
-* [ ] Props continuous?
-* [ ] Camera axis preserved?
+- [ ] Exactly 4 prompts?
+- [ ] Valid JSON only?
+- [ ] Each prompt __TARGET__s continuous?
+- [ ] No teleportation within a prompt?
+- [ ] Anchored movement only?
+- [ ] No character static > 2s?
+- [ ] Open thread continuity respected?
+- [ ] CU/ECU scale rules respected?
+- [ ] Ends unstable?
+- [ ] No forbidden visuals (sweat, tears, vapor)?
+- [ ] GAZE_TARGET present and valid?
+- [ ] ≥ 3 prompts include dialogue/VO?
+- [ ] References injected correctly?
+- [ ] Props continuous?
+- [ ] Camera axis preserved?
 
 </script>
 
@@ -795,7 +687,11 @@ at 4s [RefB]: "You shouldn't be here."
       <button class="nav-btn" data-tab="screenplay">3 · Сценарий</button>
       <button class="nav-btn" data-tab="quickplay">4 · Квик-плей</button>
       <button class="nav-btn" data-tab="library">Библиотека</button>
+      <button class="nav-btn" data-tab="templates">Шаблоны</button>
     </nav>
+    <div class="hdr-spacer"></div>
+    <button class="btn btn-sm btn-ghost" id="undo-btn" disabled title="Отменить последнее изменение состояния">↩ Отмена (0)</button>
+    <span id="backup-status" class="status" style="font-size:11px;white-space:nowrap;margin-left:4px"></span>
   </header>
 
   <main>
@@ -862,6 +758,7 @@ at 4s [RefB]: "You shouldn't be here."
       <div class="card">
         <div class="card-title">Вставьте ответ чатбота (JSON-массив рефов)</div>
         <textarea id="casting-response" class="mono" rows="12" placeholder='[{"name":"...","type":"Character","visual_desc":"..."}]'></textarea>
+        <div id="cast-validation" class="val-box"></div>
         <br>
         <div class="actions">
           <button class="btn btn-primary" id="parse-casting-btn">Разобрать и сохранить рефы</button>
@@ -892,7 +789,8 @@ at 4s [RefB]: "You shouldn't be here."
       <br>
       <div class="card">
         <div class="card-title">Вставьте ответ чатбота (JSON-объект)</div>
-        <textarea id="screenplay-response" class="mono" rows="12" placeholder='{"characters":[...],"episodes":[...]}'></textarea>
+        <textarea id="screenplay-response" class="mono" rows="12" placeholder='{"characters":[...],"episodes":[]}'></textarea>
+        <div id="screenplay-validation" class="val-box"></div>
         <br>
         <div class="actions">
           <button class="btn btn-primary" id="parse-screenplay-btn">Разобрать и сохранить сценарий</button>
@@ -921,13 +819,59 @@ at 4s [RefB]: "You shouldn't be here."
       <div class="section-row">
         <span class="section-title">Библиотека рефов</span>
         <div class="actions">
-          <button class="btn btn-sm" id="export-refs-btn">Экспорт JSON</button>
-          <button class="btn btn-sm" id="import-refs-btn">Импорт JSON</button>
+          <button class="btn btn-sm btn-primary" id="export-project-btn">⬇ Экспорт проекта</button>
+          <button class="btn btn-sm" id="import-project-btn">⬆ Импорт проекта</button>
+          <input type="file" id="import-project-file" accept=".json">
+          <button class="btn btn-sm btn-ghost" id="export-refs-btn">Рефы JSON</button>
+          <button class="btn btn-sm btn-ghost" id="import-refs-btn">Импорт рефов</button>
           <input type="file" id="import-refs-file" accept=".json">
+          <button class="btn btn-sm btn-ghost" id="restore-backup-btn">↺ Бэкап</button>
         </div>
       </div>
       <div id="library-grid" class="refs-grid">
         <div class="empty-state" style="grid-column:1/-1">Выполните шаг кастинга, чтобы заполнить рефы.</div>
+      </div>
+    </section>
+
+    <!-- ── TEMPLATES ─────────────────────────── -->
+    <section id="tab-templates" class="tab">
+      <div class="section-row">
+        <span class="section-title">Шаблоны промптов</span>
+        <span class="status">Изменения применяются при следующей генерации промпта</span>
+      </div>
+      <div class="tip">Настройте под свой жанр. Кнопка «↺ Сброс» восстанавливает шаблон по умолчанию.</div>
+      <br>
+
+      <div class="card" style="margin-bottom:12px">
+        <div class="tmpl-card-hdr">
+          <div class="card-title" style="margin-bottom:0">Кастинг (tmpl-casting)</div>
+          <button class="btn btn-sm btn-ghost" onclick="resetTmpl('casting')">↺ Сброс</button>
+        </div>
+        <textarea id="tmpl-edit-casting" class="mono" rows="20"></textarea>
+      </div>
+
+      <div class="card" style="margin-bottom:12px">
+        <div class="tmpl-card-hdr">
+          <div class="card-title" style="margin-bottom:0">Контекст производства (tmpl-screenplay-sys)</div>
+          <button class="btn btn-sm btn-ghost" onclick="resetTmpl('screenplaySys')">↺ Сброс</button>
+        </div>
+        <textarea id="tmpl-edit-screenplaySys" class="mono" rows="14"></textarea>
+      </div>
+
+      <div class="card" style="margin-bottom:12px">
+        <div class="tmpl-card-hdr">
+          <div class="card-title" style="margin-bottom:0">Шаблон эпизодов сценария (tmpl-screenplay-eps)</div>
+          <button class="btn btn-sm btn-ghost" onclick="resetTmpl('screenplayEps')">↺ Сброс</button>
+        </div>
+        <textarea id="tmpl-edit-screenplayEps" class="mono" rows="30"></textarea>
+      </div>
+
+      <div class="card" style="margin-bottom:12px">
+        <div class="tmpl-card-hdr">
+          <div class="card-title" style="margin-bottom:0">Квик-плей (tmpl-quickplay)</div>
+          <button class="btn btn-sm btn-ghost" onclick="resetTmpl('quickplay')">↺ Сброс</button>
+        </div>
+        <textarea id="tmpl-edit-quickplay" class="mono" rows="30"></textarea>
       </div>
     </section>
 
@@ -944,7 +888,7 @@ at 4s [RefB]: "You shouldn't be here."
     <div style="display:grid; grid-template-columns:140px 1fr; gap:16px;">
       <div>
         <div id="modal-thumb" style="width:140px; height:190px; background:var(--bg); border-radius:6px; border:1px solid var(--border); overflow:hidden; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:11px; cursor:pointer;" title="Click to upload PNG">
-          <span id="modal-thumb-hint">кликните для загрузки</span>
+          <span>кликните для загрузки</span>
         </div>
         <input type="file" id="modal-img-file" accept="image/png,image/jpeg,image/webp">
         <div style="margin-top:8px; font-size:11px; color:var(--muted);">PNG / JPG / WEBP</div>
@@ -961,6 +905,24 @@ at 4s [RefB]: "You shouldn't be here."
   </div>
 </div>
 
+<!-- ── ANIMATION WRAPPER MODAL ── -->
+<div id="anim-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:101; overflow:auto; padding:40px 20px;">
+  <div style="max-width:720px; margin:0 auto; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:20px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <strong>Полный промпт анимации — <span id="anim-modal-title"></span></strong>
+      <button class="btn btn-ghost btn-sm" id="anim-modal-close">✕ Закрыть</button>
+    </div>
+    <div class="actions" style="margin-bottom:10px;">
+      <label style="display:flex;align-items:center;gap:6px;margin:0;color:var(--text);font-size:13px;cursor:pointer;">
+        <input type="checkbox" id="anim-speaks" style="width:auto"> Есть диалог / озвучка
+      </label>
+      <button class="btn btn-primary btn-sm" id="anim-copy-btn">Копировать</button>
+    </div>
+    <div class="tip" style="margin-bottom:10px;">Вставьте этот промпт в Seedance / Kling / Grok вместе с @Image рефами.</div>
+    <textarea id="anim-modal-text" class="mono" rows="24" style="width:100%;resize:vertical"></textarea>
+  </div>
+</div>
+
 <script>
 'use strict';
 
@@ -970,19 +932,33 @@ at 4s [RefB]: "You shouldn't be here."
 function tmpl(id) { return document.getElementById(id).textContent.trim(); }
 
 const TMPL = {
-  style:          tmpl('tmpl-style'),
-  setting:        tmpl('tmpl-setting'),
-  casting:        tmpl('tmpl-casting'),
-  screenplaySys:  tmpl('tmpl-screenplay-sys'),
-  screenplayEps:  tmpl('tmpl-screenplay-eps'),
-  quickplay:      tmpl('tmpl-quickplay'),
+  style:         tmpl('tmpl-style'),
+  setting:       tmpl('tmpl-setting'),
+  casting:       tmpl('tmpl-casting'),
+  screenplaySys: tmpl('tmpl-screenplay-sys'),
+  screenplayEps: tmpl('tmpl-screenplay-eps'),
+  quickplay:     tmpl('tmpl-quickplay'),
 };
 
+function getTmpl(key) {
+  const ta = document.getElementById('tmpl-edit-' + key);
+  return ta ? ta.value : TMPL[key];
+}
+
+const ANIM_PROHIBITIONS =
+`CRITICALLY FORBIDDEN: object morphing, adding new objects, adding new actors.
+NO sweat — no dripping, beading, shiny skin, or wet clothing.
+NO tears — no tear tracks, glistening eyes, or eyes filling with liquid.
+NO breath vapor or mouth condensation — no visible exhale cloud.
+NO oral liquids — no saliva, drool, foam, or spittle.
+NO theatrical facial extremes: no bared teeth in anger, no sustained gaping mouth, no frozen wide-eye terror held beyond 1s.
+NO animation of photos, photo frames or ultrasound scans.`;
+
 // ─────────────────────────────────────────────────────
-// STATE / STORAGE
+// STORAGE
 // ─────────────────────────────────────────────────────
 const NS = 'mdf:';
-function lsGet(k)    { try { return JSON.parse(localStorage.getItem(NS+k)); } catch { return null; } }
+function lsGet(k)    { try { return JSON.parse(localStorage.getItem(NS+k)); } catch(e) { return null; } }
 function lsSet(k, v) { localStorage.setItem(NS+k, JSON.stringify(v)); }
 
 const state = {
@@ -992,17 +968,163 @@ const state = {
   quickplay:  lsGet('quickplay')  || {},
 };
 
-function saveRefs()       { lsSet('refs',      state.refs); }
-function saveRefImages()  { lsSet('refImages', state.refImages); }
-function saveScreenplay() { lsSet('screenplay',state.screenplay); }
-function saveQuickplay()  { lsSet('quickplay', state.quickplay); }
+function saveRefs()       { lsSet('refs',       state.refs);       }
+function saveRefImages()  { lsSet('refImages',  state.refImages);  }
+function saveScreenplay() { lsSet('screenplay', state.screenplay); }
+function saveQuickplay()  { lsSet('quickplay',  state.quickplay);  }
 
-// Persisted textarea values
 function bindPersist(id, key, init) {
-  const el = document.getElementById(id);
+  const ta = document.getElementById(id);
+  if (!ta) return;
   const stored = localStorage.getItem(NS+'txt:'+key);
-  el.value = stored !== null ? stored : init;
-  el.addEventListener('input', () => localStorage.setItem(NS+'txt:'+key, el.value));
+  ta.value = stored !== null ? stored : init;
+  ta.addEventListener('input', () => localStorage.setItem(NS+'txt:'+key, ta.value));
+}
+
+// ─────────────────────────────────────────────────────
+// UNDO
+// ─────────────────────────────────────────────────────
+const _undo = [];
+
+function pushUndo() {
+  _undo.push({
+    refs:       JSON.parse(JSON.stringify(state.refs)),
+    screenplay: JSON.parse(JSON.stringify(state.screenplay)),
+    quickplay:  JSON.parse(JSON.stringify(state.quickplay)),
+  });
+  if (_undo.length > 5) _undo.shift();
+  _updateUndoBtn();
+}
+
+function _undoLast() {
+  if (!_undo.length) return;
+  const s = _undo.pop();
+  state.refs = s.refs; state.screenplay = s.screenplay; state.quickplay = s.quickplay;
+  saveRefs(); saveScreenplay(); saveQuickplay();
+  renderCastingPreview(); renderScreenplayPreview(); renderQuickplay(); renderLibrary(); statusEl();
+  _updateUndoBtn();
+}
+
+function _updateUndoBtn() {
+  const btn = el('undo-btn');
+  if (!btn) return;
+  btn.disabled = !_undo.length;
+  btn.textContent = `↩ Отмена (${_undo.length})`;
+}
+
+// ─────────────────────────────────────────────────────
+// AUTO-BACKUP
+// ─────────────────────────────────────────────────────
+let _mutCount = 0;
+
+function trackMutation() {
+  if (++_mutCount % 5 === 0) _autoBackup();
+  updateBackupStatus();
+}
+
+function _autoBackup() {
+  const snap = { refs: state.refs, screenplay: state.screenplay, quickplay: state.quickplay, ts: Date.now() };
+  const list = lsGet('backups') || [];
+  list.unshift(snap);
+  if (list.length > 5) list.length = 5;
+  lsSet('backups', list);
+}
+
+function updateBackupStatus() {
+  const list = lsGet('backups') || [];
+  const sp = el('backup-status');
+  if (!sp) return;
+  if (list.length) {
+    const d = new Date(list[0].ts);
+    sp.textContent = `бэкап: ${d.toLocaleTimeString('ru', {hour:'2-digit', minute:'2-digit'})}`;
+    sp.className = 'status ok';
+  }
+}
+
+function restoreBackup() {
+  const list = lsGet('backups') || [];
+  if (!list.length) { alert('Нет сохранённых бэкапов.'); return; }
+  const d = new Date(list[0].ts);
+  if (!confirm(`Восстановить бэкап от ${d.toLocaleString('ru')}?\nТекущее состояние будет заменено.`)) return;
+  pushUndo();
+  const s = list[0];
+  state.refs = s.refs || []; state.screenplay = s.screenplay || null; state.quickplay = s.quickplay || {};
+  saveRefs(); saveScreenplay(); saveQuickplay();
+  renderCastingPreview(); renderScreenplayPreview(); renderQuickplay(); renderLibrary(); statusEl();
+}
+
+// ─────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────
+function el(id) { return document.getElementById(id); }
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;'); }
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+  });
+}
+
+function flashBtn(id, label='Скопировано!', ms=1500) {
+  const btn = el(id); if (!btn) return;
+  const orig = btn.textContent;
+  btn.textContent = label; btn.disabled = true;
+  setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, ms);
+}
+
+function extractJSON(raw) {
+  let s = raw.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+  const fi = Math.min(
+    s.indexOf('[') === -1 ? Infinity : s.indexOf('['),
+    s.indexOf('{') === -1 ? Infinity : s.indexOf('{')
+  );
+  if (fi === Infinity) return JSON.parse(s);
+  const sc = s[fi], ec = sc === '[' ? ']' : '}';
+  return JSON.parse(s.slice(fi, s.lastIndexOf(ec)+1));
+}
+
+// ─────────────────────────────────────────────────────
+// VALIDATION
+// ─────────────────────────────────────────────────────
+function validateRefsArr(arr) {
+  const errs = [];
+  if (!Array.isArray(arr)) {
+    errs.push('Ожидается JSON-массив (начинается с «[»). Попросите чатбот вернуть только массив объектов рефов.');
+    return errs;
+  }
+  arr.forEach((item, i) => {
+    const miss = ['name','type','visual_desc'].filter(f => !item[f]);
+    if (miss.length) errs.push(`refs[${i}] «${item.name||'?'}»: нет обязательных полей ${miss.map(f=>'"'+f+'"').join(', ')} — попросите чатбот добавить их`);
+  });
+  return errs;
+}
+
+function validateScreenplayObj(obj) {
+  const errs = [];
+  if (!obj.episodes) { errs.push('Нет поля «episodes». Попросите чатбот вернуть JSON с ключом «episodes».'); return errs; }
+  if (!Array.isArray(obj.episodes)) { errs.push('Поле «episodes» должно быть массивом.'); return errs; }
+  obj.episodes.forEach((ep, i) => {
+    const miss = ['episode_id','scenes'].filter(f => !ep[f]);
+    if (miss.length) errs.push(`episodes[${i}]: нет полей ${miss.map(f=>'"'+f+'"').join(', ')}`);
+    (ep.scenes||[]).forEach((s, j) => {
+      const sm = ['scene_local_id','scene_instructions'].filter(f => !s[f]);
+      if (sm.length) errs.push(`ep${i}.scenes[${j}]: нет ${sm.map(f=>'"'+f+'"').join(', ')}`);
+    });
+  });
+  return errs;
+}
+
+function showValidation(id, errs) {
+  const box = el(id); if (!box) return !errs.length;
+  if (!errs.length) { box.innerHTML = ''; return true; }
+  box.innerHTML = `<div style="background:rgba(248,81,73,.1);border:1px solid var(--red);border-radius:6px;padding:10px;font-size:12px;color:var(--red)">
+    <strong>⚠ Проблемы со структурой JSON:</strong>
+    <ul style="margin:4px 0 0 14px">${errs.map(e=>`<li>${escHtml(e)}</li>`).join('')}</ul>
+    <div style="margin-top:6px;opacity:.75">Скопируйте список ошибок и попросите чатбот исправить.</div>
+  </div>`;
+  return false;
 }
 
 // ─────────────────────────────────────────────────────
@@ -1014,53 +1136,15 @@ document.getElementById('nav').addEventListener('click', e => {
   const name = btn.dataset.tab;
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b === btn));
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-'+name));
-  if (name === 'quickplay') renderQuickplay();
-  if (name === 'library')   renderLibrary();
-  if (name === 'cast')      renderCastingPreview();
+  if (name === 'quickplay')  renderQuickplay();
+  if (name === 'library')    renderLibrary();
+  if (name === 'cast')       renderCastingPreview();
   if (name === 'screenplay') renderScreenplayPreview();
 });
 
 // ─────────────────────────────────────────────────────
-// HELPERS
+// STATUS
 // ─────────────────────────────────────────────────────
-function el(id) { return document.getElementById(id); }
-
-function copyText(text) {
-  navigator.clipboard.writeText(text).then(() => {
-    // brief flash feedback handled by caller
-  }).catch(() => {
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    ta.remove();
-  });
-}
-
-function flashBtn(id, label='Скопировано!', ms=1500) {
-  const btn = el(id);
-  const orig = btn.textContent;
-  btn.textContent = label;
-  btn.disabled = true;
-  setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, ms);
-}
-
-function extractJSON(raw) {
-  // strip markdown code fences
-  let s = raw.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
-  // find first [ or {
-  const fi = Math.min(
-    s.indexOf('[') === -1 ? Infinity : s.indexOf('['),
-    s.indexOf('{') === -1 ? Infinity : s.indexOf('{')
-  );
-  if (fi === Infinity) return JSON.parse(s);
-  const startChar = s[fi];
-  const endChar = startChar === '[' ? ']' : '}';
-  const li = s.lastIndexOf(endChar);
-  return JSON.parse(s.slice(fi, li+1));
-}
-
 function statusEl() {
   const castEl = el('cast-status');
   const spEl   = el('screenplay-status');
@@ -1077,8 +1161,8 @@ function statusEl() {
   }
   if (qpEl) {
     const ok = state.screenplay && state.screenplay.episodes;
-    const scenes = ok ? state.screenplay.episodes.reduce((a,e) => a + (e.scenes||[]).length, 0) : 0;
-    const saved = Object.keys(state.quickplay).length;
+    const scenes = ok ? state.screenplay.episodes.reduce((a,e)=>a+(e.scenes||[]).length, 0) : 0;
+    const saved  = Object.keys(state.quickplay).length;
     qpEl.textContent = ok ? `сцен: ${scenes}, с клипами: ${saved}` : 'сценарий не загружен';
     qpEl.className = 'status ' + (ok ? 'ok' : 'warn');
   }
@@ -1091,22 +1175,11 @@ function buildCastingPrompt() {
   const style   = el('style-text').value;
   const setting = el('setting-text').value;
   const story   = el('story-text').value.trim();
-
   return [
-    TMPL.casting,
-    '',
-    '---',
-    '## VISUAL STYLE',
-    style,
-    '',
-    '## WORLD SETTING',
-    setting,
-    '',
-    '---',
-    '## STORY TEXT',
-    story || '(no story text entered)',
-    '',
-    '---',
+    getTmpl('casting'), '', '---',
+    '## VISUAL STYLE', style, '',
+    '## WORLD SETTING', setting, '', '---',
+    '## STORY TEXT', story || '(no story text entered)', '', '---',
     '## OUTPUT',
     'Return a JSON array of reference objects. Each object must include:',
     '  name, type (Character|Room|Vehicle|Outdoor|Object),',
@@ -1119,81 +1192,92 @@ function buildCastingPrompt() {
 }
 
 function buildScreenplayPrompt() {
-  const episodes = parseInt(el('cfg-episodes').value, 10);
-  const panels   = el('cfg-panels').value.trim();
-  const style    = el('style-text').value;
-  const setting  = el('setting-text').value;
-  const story    = el('story-text').value.trim();
-
+  const episodes  = parseInt(el('cfg-episodes').value, 10);
+  const panels    = el('cfg-panels').value.trim();
+  const style     = el('style-text').value;
+  const setting   = el('setting-text').value;
+  const story     = el('story-text').value.trim();
   const approxMin = Math.round(episodes * 2 * 9 * 3 / 60);
-  const arcDur    = `~${episodes * 2 * 9 * 3}s (~${approxMin} min for ${episodes} eps × 2 scenes × 9 panels × 3s)`;
-
-  let epsTemplate = TMPL.screenplayEps
+  const arcDur    = `~${episodes*2*9*3}s (~${approxMin} min for ${episodes} eps × 2 scenes × 9 panels × 3s)`;
+  let epsTemplate = getTmpl('screenplayEps')
     .replace(/__EPISODES_COUNT__/g, String(episodes))
     .replace(/__PANEL_COUNT_OPTIONS__/g, panels)
     .replace(/__ARC_DURATION__/g, arcDur);
-
   const chars = state.refs
     .filter(r => !r.character_ref)
-    .map(r => `  - ${r.name} [${r.type || 'Character'}]`).join('\n');
-
+    .map(r => `  - ${r.name} [${r.type||'Character'}]`).join('\n');
   return [
-    '## PRODUCTION CONTEXT',
-    TMPL.screenplaySys,
-    '',
-    '---',
-    epsTemplate,
-    '',
-    '---',
-    '## VISUAL STYLE',
-    style,
-    '',
-    '## WORLD SETTING',
-    setting,
-    '',
-    '## CAST (from casting step)',
-    chars || '  (run casting step first to populate character list)',
-    '',
-    '---',
-    '## STORY TEXT',
-    story || '(no story text entered)',
+    '## PRODUCTION CONTEXT', getTmpl('screenplaySys'), '', '---',
+    epsTemplate, '', '---',
+    '## VISUAL STYLE', style, '',
+    '## WORLD SETTING', setting, '',
+    '## CAST (from casting step)', chars || '  (run casting step first)', '', '---',
+    '## STORY TEXT', story || '(no story text entered)',
   ].join('\n');
 }
 
 function buildQuickplayPrompt(ep, scene) {
-  const target  = parseInt(el('cfg-clip-duration').value, 10);
-  const system  = TMPL.quickplay.replace(/__TARGET__/g, String(target));
-
-  const chars = ep.characters || state.refs
-    .filter(r => r.type === 'Character' && !r.character_ref)
-    .map(r => r.name);
-
+  const target = parseInt(el('cfg-clip-duration').value, 10);
+  const t1 = Math.round(target * 0.20);
+  const t2 = Math.round(target * 0.47);
+  const t3 = Math.round(target * 0.73);
+  const system = getTmpl('quickplay')
+    .replace(/__TARGET__/g, String(target))
+    .replace(/__T1__/g, String(t1))
+    .replace(/__T2__/g, String(t2))
+    .replace(/__T3__/g, String(t3));
+  const chars    = ep.characters || state.refs.filter(r=>r.type==='Character'&&!r.character_ref).map(r=>r.name);
   const location = scene.location || ep.location || 'Location';
-  const refPairs = [...chars.map((c,i) => [c, `@Image${i+1}`]), [location, `@Image${chars.length+1}`]];
-  const refTable = refPairs.map(([n,t]) => `  ${n} → ${t}`).join('\n');
-
-  const bg = scene.background_activity || {};
-  const bgLine = bg.density && bg.density !== 'none'
-    ? `${bg.density} — ${bg.crowd_type || ''}`
-    : 'private, no extras';
-
+  const refPairs = [...chars.map((c,i)=>[c,`@Image${i+1}`]), [location, `@Image${chars.length+1}`]];
+  const refTable = refPairs.map(([n,t])=>`  ${n} → ${t}`).join('\n');
+  const bg       = scene.background_activity || {};
+  const bgLine   = bg.density && bg.density !== 'none' ? `${bg.density} — ${bg.crowd_type||''}` : 'private, no extras';
   return [
-    system,
-    '',
-    `SCENE: ${location} | ${ep.daytime || ''} | background: ${bgLine}`,
-    `INITIAL DISPOSITION: ${scene.initial_disposition || '—'}`,
-    '',
-    'REFERENCES (inject these tags inline in every prompt):',
-    refTable,
-    '',
-    'NARRATIVE (context only):',
-    (ep.rewritten_condensed_narrative || '').trim(),
-    '',
-    `STORYBOARD PANELS (${scene.panel_count || '?'} panels):`,
-    (scene.scene_instructions || '').trim(),
-    '',
+    system, '',
+    `SCENE: ${location} | ${ep.daytime||''} | background: ${bgLine}`,
+    `INITIAL DISPOSITION: ${scene.initial_disposition||'—'}`, '',
+    'REFERENCES (inject these tags inline in every prompt):', refTable, '',
+    'NARRATIVE (context only):', (ep.rewritten_condensed_narrative||'').trim(), '',
+    `STORYBOARD PANELS (${scene.panel_count||'?'} panels):`, (scene.scene_instructions||'').trim(), '',
     'Return a JSON array of exactly 4 animation prompt strings.',
   ].join('\n');
+}
+
+// ─────────────────────────────────────────────────────
+// ANIMATION WRAPPER
+// ─────────────────────────────────────────────────────
+function buildAnimWrapper(clipText, speaks) {
+  const lines = [
+    ANIM_PROHIBITIONS, '',
+    'BACKGROUND SOUNDS: SFX ONLY, NO MUSIC.', '',
+    'VIDEO INSTRUCTIONS: Smooth transition, high temporal consistency.', '',
+    'STYLE: Hyper-realistic cinematic, 8k quality, shot on Arri Alexa Mini LF with 50mm lens.',
+  ];
+  if (!speaks) {
+    lines.push('', 'NO VOICES, NO SPEECH, NO DIALOGUES, NO TALKING, SFX ONLY. Silent film aesthetic — purely visual storytelling, no implied dialogue or vocal performance ever.');
+  }
+  lines.push('', 'ANIMATION:', clipText);
+  return lines.join('\n');
+}
+
+let _animSceneId = null, _animClipIdx = 0;
+
+function openAnimModal(sceneId, clipIdx) {
+  _animSceneId = sceneId; _animClipIdx = clipIdx;
+  const clips    = state.quickplay[sceneId] || [];
+  const clipText = clips[clipIdx] || '';
+  const speaks   = /["«»]|says:/i.test(clipText);
+  el('anim-modal-title').textContent = `${sceneId} · Клип ${clipIdx+1}`;
+  el('anim-speaks').checked = speaks;
+  el('anim-modal-text').value = buildAnimWrapper(clipText, speaks);
+  el('anim-modal').style.display = 'block';
+}
+
+function refreshAnimWrapper() {
+  if (_animSceneId === null) return;
+  const clips    = state.quickplay[_animSceneId] || [];
+  const clipText = clips[_animClipIdx] || '';
+  el('anim-modal-text').value = buildAnimWrapper(clipText, el('anim-speaks').checked);
 }
 
 // ─────────────────────────────────────────────────────
@@ -1208,61 +1292,49 @@ el('gen-casting-btn').addEventListener('click', () => {
 el('copy-casting-btn').addEventListener('click', () => {
   const text = el('casting-prompt')._cached || el('casting-prompt').textContent;
   if (!text || text.startsWith('(нажмите')) { alert('Сначала сгенерируйте промпт.'); return; }
-  copyText(text);
-  flashBtn('copy-casting-btn');
+  copyText(text); flashBtn('copy-casting-btn');
 });
 
 el('parse-casting-btn').addEventListener('click', () => {
   const raw = el('casting-response').value.trim();
   if (!raw) { alert('Сначала вставьте ответ чатбота.'); return; }
   let parsed;
-  try {
-    parsed = extractJSON(raw);
-  } catch (e) {
-    alert('Не удалось разобрать JSON: ' + e.message);
-    return;
-  }
-  const arr = Array.isArray(parsed) ? parsed : (parsed.refs || parsed.characters || parsed.cast || [parsed]);
-  if (!arr.length) { alert('Разобранный массив пуст.'); return; }
-  state.refs = arr;
-  saveRefs();
-  renderCastingPreview();
-  statusEl();
+  try { parsed = extractJSON(raw); } catch(e) { alert('Не удалось разобрать JSON: ' + e.message); return; }
+  const arr  = Array.isArray(parsed) ? parsed : (parsed.refs || parsed.characters || parsed.cast || [parsed]);
+  const errs = validateRefsArr(arr);
+  if (!showValidation('cast-validation', errs)) return;
+  pushUndo();
+  state.refs = arr; saveRefs(); trackMutation();
+  renderCastingPreview(); statusEl();
   alert(`✅ Сохранено рефов: ${arr.length}.`);
 });
 
 el('clear-refs-btn').addEventListener('click', () => {
   if (!confirm('Очистить все рефы и изображения?')) return;
-  state.refs = [];
-  state.refImages = {};
-  saveRefs();
-  saveRefImages();
-  renderCastingPreview();
-  statusEl();
+  pushUndo();
+  state.refs = []; state.refImages = {}; saveRefs(); saveRefImages(); trackMutation();
+  renderCastingPreview(); statusEl();
 });
 
 function renderCastingPreview() {
   const container = el('casting-preview');
   if (!state.refs.length) { container.innerHTML = ''; statusEl(); return; }
   const byType = {};
-  for (const r of state.refs) {
-    const t = r.type || 'Other';
-    (byType[t] = byType[t] || []).push(r);
-  }
+  for (const r of state.refs) { const t = r.type||'Other'; (byType[t]=byType[t]||[]).push(r); }
   let html = '';
   for (const [type, typeRefs] of Object.entries(byType)) {
-    html += `<div class="card" style="margin-bottom:10px"><div class="card-title">${type} (${typeRefs.length})</div><div class="refs-grid" style="margin-top:8px">`;
+    html += `<div class="card" style="margin-bottom:10px"><div class="card-title">${escHtml(type)} (${typeRefs.length})</div><div class="refs-grid" style="margin-top:8px">`;
     for (const r of typeRefs) {
-      const img = state.refImages[r.name];
+      const img   = state.refImages[r.name];
       const thumb = img
         ? `<img src="${img}" style="width:100%;height:100%;object-fit:cover;border-radius:4px">`
-        : `<div class="ref-thumb-placeholder" onclick='openRefModal(${JSON.stringify(r.name)})'>+ PNG</div>`;
+        : `<div class="ref-thumb-placeholder" data-ref="${escAttr(r.name)}" onclick="openRefModal(this.dataset.ref)">+ PNG</div>`;
       html += `<div class="ref-card">
         <div style="width:100%;height:90px;overflow:hidden;border-radius:4px;background:var(--bg)">${thumb}</div>
-        <div class="ref-card-name">${r.name}</div>
-        <div class="ref-card-type">${r.type || '?'} ${r.character_ref ? `<span class="tag">вариация: ${r.character_ref}</span>` : ''}</div>
-        <div class="ref-card-desc">${(r.visual_desc||'').slice(0,120)}…</div>
-        <button class="btn btn-ghost btn-sm" onclick='openRefModal(${JSON.stringify(r.name)})'>Редактировать / PNG</button>
+        <div class="ref-card-name">${escHtml(r.name)}</div>
+        <div class="ref-card-type">${escHtml(r.type||'?')} ${r.character_ref?`<span class="tag">вариация: ${escHtml(r.character_ref)}</span>`:''}</div>
+        <div class="ref-card-desc">${escHtml((r.visual_desc||'').slice(0,120))}…</div>
+        <button class="btn btn-ghost btn-sm" data-ref="${escAttr(r.name)}" onclick="openRefModal(this.dataset.ref)">Редактировать / PNG</button>
       </div>`;
     }
     html += '</div></div>';
@@ -1283,67 +1355,53 @@ el('gen-screenplay-btn').addEventListener('click', () => {
 el('copy-screenplay-btn').addEventListener('click', () => {
   const text = el('screenplay-prompt')._cached || el('screenplay-prompt').textContent;
   if (!text || text.startsWith('(нажмите')) { alert('Сначала сгенерируйте промпт.'); return; }
-  copyText(text);
-  flashBtn('copy-screenplay-btn');
+  copyText(text); flashBtn('copy-screenplay-btn');
 });
 
 el('parse-screenplay-btn').addEventListener('click', () => {
   const raw = el('screenplay-response').value.trim();
   if (!raw) { alert('Сначала вставьте ответ чатбота.'); return; }
   let parsed;
-  try {
-    parsed = extractJSON(raw);
-  } catch (e) {
-    alert('Не удалось разобрать JSON: ' + e.message);
-    return;
-  }
-  if (!parsed.episodes && !Array.isArray(parsed)) { alert('Ожидается JSON с массивом "episodes".'); return; }
-  if (Array.isArray(parsed)) { parsed = { episodes: parsed }; }
-  state.screenplay = parsed;
-  saveScreenplay();
-  renderScreenplayPreview();
-  renderQuickplay();
-  statusEl();
-  const epCount = (parsed.episodes||[]).length;
-  alert(`✅ Сценарий сохранён: эпизодов ${epCount}.`);
+  try { parsed = extractJSON(raw); } catch(e) { alert('Не удалось разобрать JSON: ' + e.message); return; }
+  if (Array.isArray(parsed)) parsed = { episodes: parsed };
+  const errs = validateScreenplayObj(parsed);
+  if (!showValidation('screenplay-validation', errs)) return;
+  pushUndo();
+  state.screenplay = parsed; saveScreenplay(); trackMutation();
+  renderScreenplayPreview(); renderQuickplay(); statusEl();
+  alert(`✅ Сценарий сохранён: эпизодов ${(parsed.episodes||[]).length}.`);
 });
 
 el('clear-screenplay-btn').addEventListener('click', () => {
   if (!confirm('Очистить сохранённый сценарий?')) return;
-  state.screenplay = null;
-  saveScreenplay();
-  renderScreenplayPreview();
-  renderQuickplay();
-  statusEl();
+  pushUndo();
+  state.screenplay = null; saveScreenplay(); trackMutation();
+  renderScreenplayPreview(); renderQuickplay(); statusEl();
 });
 
 function renderScreenplayPreview() {
   const container = el('screenplay-preview');
-  if (!state.screenplay || !state.screenplay.episodes) {
-    container.innerHTML = '';
-    statusEl();
-    return;
-  }
+  if (!state.screenplay || !state.screenplay.episodes) { container.innerHTML = ''; statusEl(); return; }
   let html = '';
   for (const ep of state.screenplay.episodes) {
     const scenes = ep.scenes || [];
     html += `<div class="ep-card">
       <div class="ep-card-header">
-        <span class="ep-title">Эпизод ${ep.episode_id}</span>
-        <span class="badge badge-blue">${ep.episode_type || 'pov'}</span>
-        ${ep.pov_character ? `<span class="tag">POV: ${ep.pov_character}</span>` : ''}
-        <span class="muted">${ep.location || ''} · ${ep.daytime || ''}</span>
+        <span class="ep-title">Эпизод ${escHtml(String(ep.episode_id))}</span>
+        <span class="badge badge-blue">${escHtml(ep.episode_type||'pov')}</span>
+        ${ep.pov_character ? `<span class="tag">POV: ${escHtml(ep.pov_character)}</span>` : ''}
+        <span style="color:var(--muted);font-size:12px">${escHtml(ep.location||'')} · ${escHtml(ep.daytime||'')}</span>
       </div>
-      ${ep.rewritten_condensed_narrative ? `<div style="font-size:12px;color:var(--muted);margin-bottom:8px">${ep.rewritten_condensed_narrative.slice(0,200)}…</div>` : ''}
-      ${scenes.map(s => `<div class="scene-block">
+      ${ep.rewritten_condensed_narrative ? `<div style="font-size:12px;color:var(--muted);margin-bottom:8px">${escHtml(ep.rewritten_condensed_narrative.slice(0,200))}…</div>` : ''}
+      ${scenes.map(s=>`<div class="scene-block">
         <div class="scene-meta">
           <span>Сцена ${s.scene_local_id}</span>
-          <span>${s.location || ''}</span>
-          <span class="badge badge-orange">${s.panel_count || '?'} panels</span>
-          ${s.background_activity ? `<span>bg: ${s.background_activity.density||'?'}</span>` : ''}
+          <span>${escHtml(s.location||'')}</span>
+          <span class="badge badge-orange">${s.panel_count||'?'} panels</span>
+          ${s.background_activity ? `<span>bg: ${escHtml(s.background_activity.density||'?')}</span>` : ''}
         </div>
-        ${s.initial_disposition ? `<div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-family:var(--mono)">${s.initial_disposition.slice(0,200)}</div>` : ''}
-        <div class="scene-instructions">${(s.scene_instructions||'').slice(0,600)}${(s.scene_instructions||'').length>600?'…':''}</div>
+        ${s.initial_disposition ? `<div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-family:var(--mono)">${escHtml(s.initial_disposition.slice(0,200))}</div>` : ''}
+        <div class="scene-instructions">${escHtml((s.scene_instructions||'').slice(0,600))}${(s.scene_instructions||'').length>600?'…':''}</div>
       </div>`).join('')}
     </div>`;
   }
@@ -1361,39 +1419,36 @@ function renderQuickplay() {
     container.innerHTML = '<div class="empty-state">Сначала загрузите сценарий на шаге 3.</div>';
     return;
   }
-
   let html = '';
   for (const ep of state.screenplay.episodes) {
-    for (const scene of (ep.scenes || [])) {
-      const sceneId = `e${String(ep.episode_id).padStart(3,'0')}s${scene.scene_local_id}`;
-      const clips   = state.quickplay[sceneId];
+    for (const scene of (ep.scenes||[])) {
+      const sceneId  = `e${String(ep.episode_id).padStart(3,'0')}s${scene.scene_local_id}`;
+      const clips    = state.quickplay[sceneId];
       const hasClips = clips && clips.length;
-
       html += `<div class="scene-card" id="sc-${sceneId}">
         <div class="scene-card-header">
           <div>
             <span class="scene-card-title">Эп ${ep.episode_id} · Сцена ${scene.scene_local_id}</span>
-            <span class="tag" style="margin-left:8px">${scene.location || ep.location || ''}</span>
-            <span class="badge ${hasClips ? 'badge-green' : 'badge-orange'}" style="margin-left:6px">${hasClips ? `клипов: ${clips.length}` : 'клипов нет'}</span>
+            <span class="tag" style="margin-left:8px">${escHtml(scene.location||ep.location||'')}</span>
+            <span class="badge ${hasClips?'badge-green':'badge-orange'}" style="margin-left:6px">${hasClips?`клипов: ${clips.length}`:'клипов нет'}</span>
           </div>
           <div class="actions">
-            <button class="btn btn-primary btn-sm" onclick="genQPPrompt('${ep.episode_id}', '${scene.scene_local_id}')">Сгенерировать промпт</button>
-            <button class="btn btn-sm" onclick="copyQPPrompt('${sceneId}')">Копировать</button>
+            <button class="btn btn-primary btn-sm" data-ep="${ep.episode_id}" data-sc="${scene.scene_local_id}" onclick="genQPPrompt(this.dataset.ep, this.dataset.sc)">Сгенерировать промпт</button>
+            <button class="btn btn-sm" data-scid="${sceneId}" onclick="copyQPPrompt(this.dataset.scid)">Копировать</button>
           </div>
         </div>
         <div id="qp-prompt-${sceneId}" class="prompt-area" style="max-height:200px;display:none"></div>
         <div style="margin-top:10px">
           <label>Вставьте ответ чатбота (JSON-массив из 4 строк)</label>
-          <textarea id="qp-resp-${sceneId}" class="mono" rows="6" placeholder='["промпт клипа 1...","клип 2...","клип 3...","клип 4..."]'>${clips ? JSON.stringify(clips, null, 2) : ''}</textarea>
+          <textarea id="qp-resp-${sceneId}" class="mono" rows="6" placeholder='["промпт клипа 1...","клип 2...","клип 3...","клип 4..."]'>${hasClips ? escHtml(JSON.stringify(clips, null, 2)) : ''}</textarea>
           <div class="actions" style="margin-top:6px">
-            <button class="btn btn-sm btn-primary" onclick="saveQPClips('${sceneId}')">Сохранить клипы</button>
+            <button class="btn btn-sm btn-primary" data-scid="${sceneId}" onclick="saveQPClips(this.dataset.scid)">Сохранить клипы</button>
           </div>
         </div>
         ${hasClips ? renderClips(clips, sceneId) : ''}
       </div>`;
     }
   }
-
   container.innerHTML = html;
 }
 
@@ -1402,8 +1457,8 @@ function genQPPrompt(epId, sceneId) {
   if (!ep) return;
   const scene = (ep.scenes||[]).find(s => s.scene_local_id == sceneId);
   if (!scene) return;
-  const scId  = `e${String(epId).padStart(3,'0')}s${sceneId}`;
-  const prompt = buildQuickplayPrompt(ep, scene);
+  const scId    = `e${String(epId).padStart(3,'0')}s${sceneId}`;
+  const prompt  = buildQuickplayPrompt(ep, scene);
   const promptEl = el(`qp-prompt-${scId}`);
   promptEl.textContent = prompt;
   promptEl._cached = prompt;
@@ -1418,20 +1473,14 @@ function copyQPPrompt(sceneId) {
 }
 
 function saveQPClips(sceneId) {
-  const raw = (el(`qp-resp-${sceneId}`) || {}).value || '';
+  const raw = (el(`qp-resp-${sceneId}`)||{}).value || '';
   if (!raw.trim()) { alert('Сначала вставьте ответ чатбота.'); return; }
   let parsed;
-  try {
-    parsed = extractJSON(raw.trim());
-  } catch(e) {
-    alert('Не удалось разобрать JSON: ' + e.message);
-    return;
-  }
+  try { parsed = extractJSON(raw.trim()); } catch(e) { alert('Не удалось разобрать JSON: ' + e.message); return; }
   const arr = Array.isArray(parsed) ? parsed : [parsed];
-  state.quickplay[sceneId] = arr;
-  saveQuickplay();
-  renderQuickplay();
-  statusEl();
+  pushUndo();
+  state.quickplay[sceneId] = arr; saveQuickplay(); trackMutation();
+  renderQuickplay(); statusEl();
   alert(`✅ Сохранено клипов: ${arr.length} для ${sceneId}.`);
 }
 
@@ -1440,7 +1489,10 @@ function renderClips(clips, sceneId) {
   let html = '<div class="clips-list">';
   clips.forEach((c, i) => {
     html += `<div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Клип ${i+1}${refs.length ? ' — загрузите рефы: '+refs.join(', ') : ''}</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;display:flex;justify-content:space-between;align-items:center">
+        <span>Клип ${i+1}${refs.length ? ' — рефы: ' + escHtml(refs.join(', ')) : ''}</span>
+        <button class="btn btn-ghost btn-sm" style="font-size:10px;padding:2px 8px" data-scid="${sceneId}" data-ci="${i}" onclick="openAnimModal(this.dataset.scid, +this.dataset.ci)">Полный промпт ↗</button>
+      </div>
       <div class="clip-item">${escHtml(c)}</div>
     </div>`;
   });
@@ -1455,12 +1507,8 @@ function buildRefList(sceneId) {
   if (!ep) return [];
   const scene = (ep.scenes||[]).find(s => s.scene_local_id == parseInt(m[2]));
   const chars = ep.characters || state.refs.filter(r=>r.type==='Character'&&!r.character_ref).map(r=>r.name);
-  const loc   = (scene && scene.location) || ep.location || '';
+  const loc   = (scene&&scene.location) || ep.location || '';
   return [...chars.map((c,i)=>`${c}=@Image${i+1}`), loc && `${loc}=@Image${chars.length+1}`].filter(Boolean);
-}
-
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 // ─────────────────────────────────────────────────────
@@ -1478,12 +1526,11 @@ function renderLibrary() {
     html += `<div class="ref-card">
       ${img
         ? `<div style="height:160px;overflow:hidden;border-radius:4px"><img src="${img}" style="width:100%;height:100%;object-fit:cover"></div>`
-        : `<div class="ref-thumb-placeholder" onclick='openRefModal(${JSON.stringify(r.name)})'>+ Загрузить PNG</div>`
-      }
-      <div class="ref-card-name">${r.name}</div>
-      <div class="ref-card-type">${r.type||'?'}${r.character_ref ? ` · вариация: ${r.character_ref}` : ''}</div>
-      <div class="ref-card-desc">${(r.visual_desc||'').slice(0,100)}…</div>
-      <button class="btn btn-ghost btn-sm" onclick='openRefModal(${JSON.stringify(r.name)})'>Редактировать / Загрузить</button>
+        : `<div class="ref-thumb-placeholder" data-ref="${escAttr(r.name)}" onclick="openRefModal(this.dataset.ref)">+ Загрузить PNG</div>`}
+      <div class="ref-card-name">${escHtml(r.name)}</div>
+      <div class="ref-card-type">${escHtml(r.type||'?')}${r.character_ref ? ` · вариация: ${escHtml(r.character_ref)}` : ''}</div>
+      <div class="ref-card-desc">${escHtml((r.visual_desc||'').slice(0,100))}…</div>
+      <button class="btn btn-ghost btn-sm" data-ref="${escAttr(r.name)}" onclick="openRefModal(this.dataset.ref)">Редактировать / Загрузить</button>
     </div>`;
   }
   grid.innerHTML = html;
@@ -1500,24 +1547,14 @@ function openRefModal(name) {
   el('modal-title').textContent = name;
   el('modal-json').value = JSON.stringify(ref, null, 2);
   const img = state.refImages[name];
-  const thumb = el('modal-thumb');
-  if (img) {
-    thumb.innerHTML = `<img src="${img}" style="width:100%;height:100%;object-fit:cover;border-radius:4px">`;
-  } else {
-    thumb.innerHTML = '<span id="modal-thumb-hint">кликните для загрузки</span>';
-  }
+  el('modal-thumb').innerHTML = img
+    ? `<img src="${img}" style="width:100%;height:100%;object-fit:cover;border-radius:4px">`
+    : '<span>кликните для загрузки</span>';
   el('ref-modal').style.display = 'block';
 }
 
-el('modal-close').addEventListener('click', () => {
-  el('ref-modal').style.display = 'none';
-  _modalRefName = null;
-});
-
-el('ref-modal').addEventListener('click', e => {
-  if (e.target === el('ref-modal')) { el('ref-modal').style.display = 'none'; _modalRefName = null; }
-});
-
+el('modal-close').addEventListener('click', () => { el('ref-modal').style.display = 'none'; _modalRefName = null; });
+el('ref-modal').addEventListener('click', e => { if (e.target === el('ref-modal')) { el('ref-modal').style.display = 'none'; _modalRefName = null; } });
 el('modal-thumb').addEventListener('click', () => el('modal-img-file').click());
 
 el('modal-img-file').addEventListener('change', e => {
@@ -1528,8 +1565,7 @@ el('modal-img-file').addEventListener('change', e => {
     state.refImages[_modalRefName] = ev.target.result;
     saveRefImages();
     el('modal-thumb').innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:4px">`;
-    renderLibrary();
-    renderCastingPreview();
+    renderLibrary(); renderCastingPreview();
   };
   reader.readAsDataURL(file);
   e.target.value = '';
@@ -1537,30 +1573,17 @@ el('modal-img-file').addEventListener('change', e => {
 
 el('modal-save').addEventListener('click', () => {
   let parsed;
-  try {
-    parsed = JSON.parse(el('modal-json').value);
-  } catch(e) {
-    alert('Неверный JSON: ' + e.message);
-    return;
-  }
+  try { parsed = JSON.parse(el('modal-json').value); } catch(e) { alert('Неверный JSON: ' + e.message); return; }
   const idx = state.refs.findIndex(r => r.name === _modalRefName);
-  if (idx >= 0) {
-    state.refs[idx] = parsed;
-  } else {
-    state.refs.push(parsed);
-  }
-  // handle rename
+  if (idx >= 0) state.refs[idx] = parsed; else state.refs.push(parsed);
   if (parsed.name && parsed.name !== _modalRefName && state.refImages[_modalRefName]) {
     state.refImages[parsed.name] = state.refImages[_modalRefName];
     delete state.refImages[_modalRefName];
     saveRefImages();
   }
   saveRefs();
-  el('ref-modal').style.display = 'none';
-  _modalRefName = null;
-  renderLibrary();
-  renderCastingPreview();
-  statusEl();
+  el('ref-modal').style.display = 'none'; _modalRefName = null;
+  renderLibrary(); renderCastingPreview(); statusEl();
   alert('✅ Реф сохранён.');
 });
 
@@ -1568,13 +1591,9 @@ el('modal-delete').addEventListener('click', () => {
   if (!confirm(`Удалить реф "${_modalRefName}"?`)) return;
   state.refs = state.refs.filter(r => r.name !== _modalRefName);
   delete state.refImages[_modalRefName];
-  saveRefs();
-  saveRefImages();
-  el('ref-modal').style.display = 'none';
-  _modalRefName = null;
-  renderLibrary();
-  renderCastingPreview();
-  statusEl();
+  saveRefs(); saveRefImages();
+  el('ref-modal').style.display = 'none'; _modalRefName = null;
+  renderLibrary(); renderCastingPreview(); statusEl();
 });
 
 // ─────────────────────────────────────────────────────
@@ -1588,45 +1607,93 @@ el('export-refs-btn').addEventListener('click', () => {
   a.click();
 });
 
-el('import-refs-btn').addEventListener('click', () => el('import-refs-file').click());
+el('export-project-btn').addEventListener('click', () => {
+  const data = { refs: state.refs, refImages: state.refImages, screenplay: state.screenplay, quickplay: state.quickplay };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `mdf-project-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+});
 
+el('import-refs-btn').addEventListener('click', () => el('import-refs-file').click());
 el('import-refs-file').addEventListener('change', e => {
-  const file = e.target.files[0];
-  if (!file) return;
+  const file = e.target.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = ev => {
     try {
       const arr = JSON.parse(ev.target.result);
       if (!Array.isArray(arr)) throw new Error('Ожидается JSON-массив');
-      state.refs = arr;
-      saveRefs();
-      renderLibrary();
-      renderCastingPreview();
-      statusEl();
+      pushUndo(); state.refs = arr; saveRefs(); trackMutation();
+      renderLibrary(); renderCastingPreview(); statusEl();
       alert(`✅ Импортировано рефов: ${arr.length}.`);
-    } catch(e) {
-      alert('Импорт не удался: ' + e.message);
-    }
+    } catch(e) { alert('Импорт не удался: ' + e.message); }
   };
-  reader.readAsText(file);
-  e.target.value = '';
+  reader.readAsText(file); e.target.value = '';
 });
+
+el('import-project-btn').addEventListener('click', () => el('import-project-file').click());
+el('import-project-file').addEventListener('change', e => {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      pushUndo();
+      if (data.refs)       { state.refs       = data.refs;       saveRefs();       }
+      if (data.refImages)  { state.refImages  = data.refImages;  saveRefImages();  }
+      if (data.screenplay) { state.screenplay = data.screenplay; saveScreenplay(); }
+      if (data.quickplay)  { state.quickplay  = data.quickplay;  saveQuickplay();  }
+      trackMutation();
+      renderLibrary(); renderCastingPreview(); renderScreenplayPreview(); renderQuickplay(); statusEl();
+      alert('✅ Проект импортирован.');
+    } catch(e) { alert('Импорт не удался: ' + e.message); }
+  };
+  reader.readAsText(file); e.target.value = '';
+});
+
+el('restore-backup-btn').addEventListener('click', restoreBackup);
+
+// ─────────────────────────────────────────────────────
+// ANIMATION MODAL
+// ─────────────────────────────────────────────────────
+el('anim-modal-close').addEventListener('click', () => { el('anim-modal').style.display = 'none'; _animSceneId = null; });
+el('anim-modal').addEventListener('click', e => { if (e.target === el('anim-modal')) { el('anim-modal').style.display = 'none'; _animSceneId = null; } });
+el('anim-copy-btn').addEventListener('click', () => { copyText(el('anim-modal-text').value); flashBtn('anim-copy-btn'); });
+el('anim-speaks').addEventListener('change', refreshAnimWrapper);
+
+// ─────────────────────────────────────────────────────
+// UNDO BUTTON
+// ─────────────────────────────────────────────────────
+el('undo-btn').addEventListener('click', _undoLast);
+
+// ─────────────────────────────────────────────────────
+// TEMPLATES TAB
+// ─────────────────────────────────────────────────────
+function resetTmpl(key) {
+  const ta = el('tmpl-edit-' + key);
+  if (!ta) return;
+  ta.value = TMPL[key];
+  localStorage.setItem(NS + 'txt:tmpl:' + key, TMPL[key]);
+}
 
 // ─────────────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────────────
-bindPersist('story-text',   'story',   '');
-bindPersist('style-text',   'style',   TMPL.style);
-bindPersist('setting-text', 'setting', TMPL.setting);
-bindPersist('cfg-episodes', 'cfgEp',   '3');
-bindPersist('cfg-panels',   'cfgPan',  '4,6,9,10,12');
-
-// cfg-episodes and cfg-panels are <select>/<input> — bindPersist works for them too
-// but select needs value assignment after options are in DOM — handled above.
+bindPersist('story-text',              'story',              '');
+bindPersist('style-text',              'style',              TMPL.style);
+bindPersist('setting-text',            'setting',            TMPL.setting);
+bindPersist('cfg-episodes',            'cfgEp',              '3');
+bindPersist('cfg-panels',              'cfgPan',             '4,6,9,10,12');
+bindPersist('tmpl-edit-casting',       'tmpl:casting',       TMPL.casting);
+bindPersist('tmpl-edit-screenplaySys', 'tmpl:screenplaySys', TMPL.screenplaySys);
+bindPersist('tmpl-edit-screenplayEps', 'tmpl:screenplayEps', TMPL.screenplayEps);
+bindPersist('tmpl-edit-quickplay',     'tmpl:quickplay',     TMPL.quickplay);
 
 renderCastingPreview();
 renderScreenplayPreview();
 statusEl();
+updateBackupStatus();
 </script>
 </body>
 </html>
