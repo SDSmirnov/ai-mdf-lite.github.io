@@ -977,7 +977,7 @@ function renderCastingPreview() {
         <div class="ref-card-name">${r.name}</div>
         <div class="ref-card-type">${r.type || '?'} ${r.character_ref ? `<span class="tag">вариация: ${r.character_ref}</span>` : ''}</div>
         <div class="ref-card-desc">${(r.visual_desc||'').slice(0,120)}…</div>
-        <button class="btn btn-ghost btn-sm" onclick=openRefModal(${JSON.stringify(r.name)})'>Редактировать / PNG</button>
+        <button class="btn btn-ghost btn-sm" onclick='openRefModal(${JSON.stringify(r.name)})'>Редактировать / PNG</button>
       </div>`;
     }
     html += '</div></div>';
