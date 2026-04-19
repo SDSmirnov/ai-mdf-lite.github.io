@@ -467,20 +467,54 @@ SELF-AUDIT before finalizing:
 <script type="text/plain" id="tmpl-quickplay">
 # VERTICAL MICRODRAMA VIDEO PROMPT GUIDE
 
-## 1. ROLE & OUTPUT
-
-- **Role**: Prompt engineer translating story beats → 4 sequential video prompts (Seedance / Kling / Grok).
-- **Output**: Exactly 4 prompts covering the full scene arc in order.
-- **Format**: Vertical 9:16. Real-time pacing — no montage compression.
-- **Clip length**: __TARGET__s continuous per prompt.
+_For native-reference video models: Seedance 2.0 / Kling 3.0 / Grok Video._
+_Optimized for long-form clips (10–15s) with in-clip scale switching._
 
 ---
 
-## 2. LAWS OF MOTION
+## 1. ROLE & OUTPUT
 
-- **Constant Change**: no stillness > 2s. Micro-motion (breath, weight shift, finger tension) counts. ≥ 2s frozen = swipe risk.
-- **One Shot, One Scale**: never mix incompatible scales. ECU face + floor detail = HARD FAILURE.
-- **Location Lock**: teleportation allowed *between* prompts only. Within a prompt, motion must stay physically anchored.
+- **Role**: Prompt engineer translating storyboard panels → 4 sequential video prompts for a native-reference video model.
+- **Output**: Exactly 4 prompts covering the full scene arc in order.
+- **Format**: Vertical 9:16. Real-time pacing — no montage compression.
+- **Clip length**: __TARGET__s continuous per prompt (supported range: 10–15s).
+- **Input**: A storyboard of 9–12 panels per scene. Compress into 4 clips per the mapping table below.
+
+---
+
+## 2. PANEL → CLIP MAPPING
+
+The storyboard delivers N panels (typically 9–12). You must compress into exactly 4 clips while preserving anchor panels.
+
+### Anchor Panels (NEVER merge with neighbors)
+
+These are dramaturgically load-bearing and must get their own scale segment:
+
+- **P1** — `cold_open`
+- **P⌈N×0.44⌉** — `emotional_capture`
+- **P⌈N×0.78⌉** — `pivot`
+- **P_N** — `tension_peak` or `cliffhanger`
+
+### Default Distribution Tables
+
+| Panel count | Clip 1 | Clip 2 | Clip 3 | Clip 4 |
+|-------------|--------|--------|--------|--------|
+| 9 panels    | P1–P2  | P3–P5  | P6–P7  | P8–P9  |
+| 10 panels   | P1–P2  | P3–P6  | P7–P8  | P9–P10 |
+| 11 panels   | P1–P3  | P4–P6  | P7–P8  | P9–P11 |
+| 12 panels   | P1–P3  | P4–P7  | P8–P9  | P10–P12 |
+
+### Clip Duration by Panel Load
+
+- 2 panels per clip → 10–12s
+- 3 panels per clip → 12–15s
+- 4 panels per clip → 15s (hard ceiling; split if denser)
+
+### Hard Rules
+
+- Anchor panels (see above) MUST each get a dedicated scale segment inside their clip — never collapsed into an adjacent panel
+- Dialogue from P_N MUST appear in the clip containing P_N; moving it earlier or later = HARD FAILURE
+- If a panel's `hook_type` is `pivot` or `cliffhanger`, it is ALWAYS the last panel of its clip (segment ends on unstable hold)
 
 ---
 
@@ -498,180 +532,448 @@ Return EXACTLY:
 ```
 
 Rules:
+
 - No extra keys, no explanations, no markdown outside the JSON
-- Each string = one continuous clip (150–300 words)
-- Prompts must be self-contained but state-continuous
+- Each string = one continuous clip (250–450 words for multi-panel clips; 150–300 for 2-panel clips)
+- Prompts must be self-contained but state-continuous (see First-Frame Match Law, §7)
 
 ---
 
-## 4. DRAMA ENGINE
+## 4. LAWS OF MOTION
 
-### Reference Injection
-
-- First mention per prompt: `CharacterName (@ImageRef1)`
-- Props: `PropName (@PropRefA)`
-- Tags inline only — never dump a reference table
-- Props persist across prompts unless explicitly moved or removed
-
-### Gaze Contract
-
-Every multi-actor prompt MUST state:
-`GAZE_TARGET: [Ref1] → [Person/Anchor], [Ref2] → [Person/Anchor]`
-
-- FRONTAL profile + sideways gaze = CONTRADICTION; gaze must match head orientation
-- **POV Law**: `[Ref]'s POV` = that character cannot appear in frame; use over-the-shoulder if they must be visible
-- Missing or contradictory GAZE_TARGET = HARD FAILURE
-
-### Physical Action
-
-Use ONLY mechanical verbs: `grips`, `steps`, `pivots`, `extends`, `presses`, `drops`, `reaches`, `releases`, `leans`, `pulls`, `tilts`.
-
-FORBIDDEN: emotional verbs (`hesitates`, `breaks`) and metaphors (`iron grip`, `pins her`).
-
-Encode via anatomy + measurement: `jaw tension 2mm`, `shoulders drop 3cm`, `weight shifts 4cm to right foot`.
-
-### Directional Lock
-
-FORBIDDEN: `forward`, `backward`, `away`, `toward camera`, `closer`.
-
-Must resolve to a named anchor or character:
-- `steps 20cm toward [entrance-door]`
-- `leans toward [Anna] across [glass-table]`
-
-### Dialogue Budget
-
-- ≤ 8 words per line; ~24 characters/sec combined (dialogue + VO)
-- At least **3 of 4 prompts** must contain dialogue or voiceover
-- Silent prompts allowed only if physical tension escalates in place of speech
-- Inner monologue: 4–5 words only, never narrates visible action
+- **Constant Change**: no stillness > 2s. Micro-motion (breath, weight shift, finger tension) counts. ≥ 2s frozen = swipe risk.
+- **Scale Switching Allowed**: within a clip, the camera CAN change scale (MS → CU → ECU) via motivated transitions (see §5). This is the core advantage of native-reference models over I2V — use it.
+- **One Segment, One Scale**: within a single scale segment, never mix incompatible scales in the same frame. ECU face + floor detail in the same shot = HARD FAILURE.
+- **Location Lock**: character teleportation forbidden within a clip. A character moves from A to B only through traversible motion with timestamps.
+- **Frame-0 Law**: at `[0s]` every in-frame actor is in a PRE-action pose matching the reference image. EXCEPTION: the first clip's `[0s]` (cold_open P1) may open mid-action at 50%+ complete.
 
 ---
 
-## 5. MOTION LAWS
+## 5. SCALE-SWITCHING CONTRACT
 
-### Living Pose (Anti-Tableau)
+A single clip may contain 1–3 scale segments, each corresponding to one storyboard panel.
 
-Humans are never fully still. No character unchanged > 2s.
+### Format Inside the Prompt
 
-Micro-motion: weight shift (2–5cm), head tilt (3–8°), finger pressure, chest rise (1–2cm).
+```
+[0s–4s] SCALE: MS (panel P3, escalation)
+[4s–8s] SCALE: CU (panel P4, verbal hook) — camera pushes in during 3.5s–4s
+[8s–12s] SCALE: ECU (panel P5, pivot) — hard dolly to [Nastya]'s eyes at 7.8s
+```
 
-Use `CONCURRENT:` for non-speaking actors.
+### Transition Verbs (always declare one between segments)
 
-### Action-Reaction & Open Threads
+- `camera pushes in` / `dolly-in` — MS → CU → ECU
+- `camera pulls back` / `dolly-out` — ECU → CU → MS
+- `lens tracks to ECU on [anchor]` — motivated by character action
+- `cut-on-motion at [time]s` — hard cut disguised by mid-motion subject
+- `camera arcs [N]° around [anchor]` — lateral transition, ≥90° for 180°-rule exemption
 
-- Micro-actions complete inside the prompt; outcomes carry to the next
-- **Open Thread Rule**: Prompt N+1 must resolve Prompt N's ending within its first 0–1s
+### Scale Segment Rules
 
-### Temporal Structure (__TARGET__s per clip)
-
-- **0s–__T1__s**: establish + micro-tension
-- **__T1__s–__T2__s**: primary action
-- **__T2__s–__T3__s**: escalation or reaction
-- **__T3__s–__TARGET__s**: tension hold / unstable end
-
-### Narrative Density
-
-Budget narrative to __TARGET__s — assign a timestamp to every beat to avoid over-packing the clip.
-
-### Motion Rhythm
-
-Avoid mixing fast and slow phases within one prompt. Keep rhythm consistent per clip.
+- ≤3 scale segments per clip (otherwise = Scale Salad, HARD FAILURE)
+- Each new segment opens with a 0.5s "new-anchor" beat: a fresh pose description for in-frame actors. Otherwise model reads the scale change as a reset.
+- Prop + character continuity locked across segments: same grip, same anatomy word (`shoulder` ≠ `collarbone` ≠ `neck`), same relative position ±10cm
+- Dialogue speaker MUST be in CU or ECU during their line (scale segment must be sized to the speaker)
 
 ---
 
-## 6. SPATIAL RULES (9:16)
+## 6. MOTION LAWS
 
-### State Continuity (Jump Lock)
+### Living Pose — Idle Motion Budget
 
-Character ends Prompt N at [location A] holding [prop] → must begin Prompt N+1 at [location B] in the same pose/grip.
+Humans are never still. Every in-frame character MUST receive at least one idle motion per second in frame. Any character frozen ≥1s without idle motion = HARD FAILURE.
 
-### Anchor Topology
+| State | Required idle motion (≥1 per second) |
+|-------|--------------------------------------|
+| **Listening** | weight shift 2–5cm, head tilt 3–8°, eye track to speaker, hand resettles, finger curl/uncurl, chest rise 1cm |
+| **Thinking / internal** | gaze breaks to neutral space then returns, jaw works slightly, free hand to face then drops, shoulder 1–2cm adjust |
+| **Talking** | head nods on accents 5–15°, free hand gestures, torso turns slightly, eyebrows move with tone |
+| **Stressed / waiting** | foot weight transfer every 2–3s, fingers drum or press, thumb rubs index, lips compress and release |
 
-Use ONLY named anchors: `[sofa]`, `[door]`, `[table]`.
+**Secondary-character law**: "stays still", "watches", "listens" as a sole action = HARD FAILURE. Replace with a reactive proxy: weight shift, grip tighten, prop adjust, head turn ≥15°, breath rise.
 
-Format: `"[anchor], [distance] toward [anchor2] from [Actor]"`
+**Distribute idle motion across the timeline** — don't dump it at the end. Use `CONCURRENT:` lines beside the primary actor's timed beats.
 
-FORBIDDEN: compass directions, vague positions, absolute coordinates.
+### Mechanical Verbs (expanded)
 
-### Scale & Frame Exclusion
+Use ONLY these mechanical verbs for physical action:
 
-- **ECU (~30cm)**: subject only
-- **CU (~1m)**: subject + actors within 1m
-- **MS (~3–4m)**: group allowed
-- At CU/ECU: no background actions; off-frame actors = no motion
+`grips` `steps` `pivots` `extends` `presses` `drops` `reaches` `releases` `leans` `pulls` `pushes` `tilts` `retracts` `rotates` `crosses` `retreats` `slides` `locks` `turns` `raises` `swings` `lowers`
+
+FORBIDDEN: emotional verbs (`hesitates`, `breaks`, `crumbles`, `melts`), metaphors (`iron grip`, `pins her`, `drinks her in`), figurative language of any kind.
+
+Encode emotional state via anatomy + measurement:
+
+- Fear → `retreats 10cm, spine presses to [wall], shoulders rise 2cm`
+- Anger → `steps 20cm toward [target], jaw clamps, chin juts 3cm toward [target]`
+- Shock → `brows flash up 0.3s then soften, hands freeze 0.5s, then reactive motion`
+- Relief → `shoulders drop 2cm, jaw releases, chest drops on exhale`
+- Contempt → `upper lip tightens unilaterally, head tilts back 5–10°, weight rearward`
+
+### Directional Lock — every direction resolves to a named target
+
+FORBIDDEN bare direction words for ANY motion subject (body, limb, head, gaze, weight):
+
+`forward` `backward` `away` `toward camera` `toward the lens` `closer` `inward` `outward`
+
+Every direction MUST resolve to a named anchor or person:
+
+- `steps forward` → `steps 20cm toward [entrance-door]`
+- `arm extends forward` → `arm extends toward [Client]`
+- `head turns toward camera` → `head turns toward [Vera]`
+- `leans forward` → `leans toward [Igor] across [glass-table]`
+- `weight shifts forward` → `weight transfers onto lead foot`
+- `gaze drifts toward lens` → `gaze tracks toward [Nastya]`
+
+### Action-Then-Reaction Law
+
+A physical contact event (strike, grab, fall, cut, drop) COMPLETES inside its scale segment. Reaction begins in the NEXT segment's first 0.5–1s.
+
+FORBIDDEN: interleaving action and reaction across the same segment's beats. Wind-up + strike + target reaction = ONE continuous arc ≤4s.
+
+### Temporal Compression Law
+
+If a physical sequence takes ≤4s in real life → encode in ONE segment, not split.
+
+- WRONG: segment A "runs to door" + segment B "opens door" + segment C "enters" = 3 segments for 3 real seconds
+- RIGHT: ONE segment covering sprint + grip + push + cross threshold
+
+### Concurrent Layer
+
+Every dialogue beat requires a `CONCURRENT:` line describing the NON-speaker's body reaction during that second. Silent listener = tableau failure.
+
+Example:
+```
+at 4s Vera: "She's not one of us."
+CONCURRENT: Lenka's right thumb presses the phone-screen 2mm, jaw tightens, chin juts 3° toward Vera.
+```
+
+### Frame-0 Law (repeat — critical)
+
+At `[0s]` every in-frame actor is in the PRE-action pose. The still image the video model grounds from is this frame — if `[0s]` describes mid-action, model and reference image diverge → jumpy first second.
+
+- WRONG at 0s: "arm already mid-swing", "body already turning", "mouth already open speaking"
+- RIGHT at 0s: "right arm at side, weight on left foot, lips closed, gaze on [target]"
+- EXCEPTION: Clip 1's `[0s]` for cold_open P1 only — may open mid-action at ≥50% complete
+
+---
+
+## 7. STATE CONTINUITY
+
+### First-Frame Match Law (replaces old Open Thread rule)
+
+Clip N+1's `[0s] STATE` must be pixel-compatible with Clip N's final frame:
+
+- Character positions: ±10cm
+- Prop positions: ±5cm
+- Grip and pose: identical body-part words (`shoulder` ≠ `collarbone`)
+- Lighting master: same key direction, color temp, time-of-day
+
+**Writing protocol**: draft Clip N+1's `[0s] STATE` by copying the LAST visible state from Clip N's closing beats, then introduce new action at `[0.5s]` or later.
 
 ### Prop Continuity
 
-Props persist across prompts. Position must match previous end state. Removal requires explicit action.
+Props persist across clips. Once a prop appears, it MUST appear in every subsequent clip until explicitly removed (pocketed, handed off, exits frame with a character, thrown off-screen). Silent prop disappearance = HARD FAILURE.
+
+When a prop has no active change, write: `PROP: [name] unchanged — [last known position]`.
+
+### Reference Injection (timing-aware)
+
+- Tag on first VISIBLE appearance inside the clip, not first mention in text
+- If a character enters mid-clip, place the `(@ImageN)` tag at the entry timestamp:
+  - WRONG (header at 0s): `"Prompt features Maxim (@Image2). At 6s he enters."`
+  - RIGHT (tag at entry): `"...at 6s door opens, Maxim (@Image2) steps into frame"`
+- Props follow the same rule: tag at first visible beat
+- References listed before they are visible → model places them in frame at [0s] → teleport
+
+### Occlusion & Reveal (native-reference feature)
+
+Unlike I2V models, Seedance/Kling/Grok CAN render a character entering frame mid-clip from a reference image — BUT only if you describe the reveal mechanism explicitly.
+
+Valid reveal mechanisms:
+
+- **Off-frame entry**: `"at 5s [Maxim] (@Image2) enters frame-left, steps into sharp focus"`
+- **Door reveal**: `"at 4s door swings 90°, revealing [Mysterious-Man] (@Image3) 3m behind in elevator"`
+- **Rack-focus reveal**: `"at 6s focus pulls from [phone-screen] FG to [Nastya] MG, 2m behind"`
+- **Occlusion release**: `"at 3s [Lenka] steps 40cm toward [door], revealing [Kuzya] crouched behind her"`
+- **Lighting reveal**: `"at 7s fluorescent snaps on, revealing [figure] previously in shadow at [far-wall]"`
+
+HARD FAILURE: character appearing at a mid-clip timestamp without a reveal mechanism = teleport.
+
+---
+
+## 8. DRAMA ENGINE
+
+### Gaze Contract
+
+Every multi-actor segment MUST state:
+
+`GAZE_TARGET: [Ref1] → [Person/Anchor], [Ref2] → [Person/Anchor]`
+
+Update GAZE_TARGET at each scale transition if gaze shifts.
+
+- FRONTAL profile + sideways gaze at another character = CONTRADICTION; gaze must match head orientation
+- **POV Law**: `[Ref]'s POV` = that character cannot appear in frame. If they must be visible, use over-the-shoulder instead.
+- Missing or contradictory GAZE_TARGET = HARD FAILURE
+
+### Dialogue Density Budget (clip-level)
+
+Total speech budget per clip ≈ 24 chars/sec × duration:
+
+- 10s clip: max ≈240 chars (≈40 words) combined across dialogue + VO
+- 12s clip: max ≈288 chars (≈48 words)
+- 15s clip: max ≈360 chars (≈60 words)
+
+Per-line limits:
+
+- Dialogue line: ≤8 words, ≤ ~3s to deliver
+- Inner monologue (VO): 4–5 words, never narrates visible action
+- Maximum 4 speech events per clip (dialogue + VO combined)
+
+Layering rules:
+
+- ≥2 seconds of silence between two spoken lines (TTS breath room)
+- Dialogue and VO never overlap — VO fills silent beats only
+- At least **3 of 4 clips** must contain dialogue or VO
+- Silent clips allowed only when physical tension escalates visibly in place of speech
+
+Timestamp every speech event:
+
+```
+at 2s Nastya: "I can grow a frog in a pot."
+CONCURRENT: Maxim's right thumb stops clicking [cufflink], chin lifts 3°.
+at 5s (VO) Nastya: "He feels my power."
+at 8s Maxim: "You are hired. No frogs."
+```
+
+### Unstable End Pattern
+
+The last beat of every clip MUST match one of these templates:
+
+- `"Unstable hold on [subject] [action-in-progress]."`
+- `"[Actor] frozen mid-[verb], [body-part] [measurement] from [anchor]."`
+- `"[Prop] at [anchor-edge], [tilt/angle], not yet [verb]."`
+- `"[Actor]'s [body-part] [half-action], outcome not visible before clip ends."`
+
+FORBIDDEN in final beat: `settles`, `relaxes`, `resolves`, `the action is complete`, neutral standing, hands at sides, both feet planted evenly.
 
 ### Content Filters
 
-FORBIDDEN: sweat, tears, vapor, breath fog, saliva.
+FORBIDDEN visuals anywhere in the prompt:
 
-Encode breathing mechanically: `chest drops 1cm`, `shoulders settle 2cm`.
+- Tears (running, brimming, glinting, tear tracks, moisture in eyes)
+- Sweat (glistening, dripping, damp skin)
+- Visible breath / vapor / breath fog / condensation
+- Saliva, drool, spittle
+- Any oral liquid
 
-Facial expressions: micro only, no sustained extremes. No complete stillness — always include micro-motion (`fingers flex`, `chest rises`).
+Encode these as body mechanics only:
 
-### Vertical Framing
+- breathing → `chest drops 1cm on exhale`, `shoulders settle 2cm`
+- exertion → `jaw releases`, `shoulders rise 2cm`
+- grief → `jaw quivers 1mm`, `chin drops 5° toward chest`
 
-Faces dominate. Safe zone: middle 65% of frame height.
+Facial expressions: micro only, no sustained extremes. Always include micro-motion (`fingers flex`, `chest rises`, `eyes track`).
 
-### 180° Rule
+---
 
-Camera axis consistent across prompts. Flip only if actor crosses the scene midpoint.
+## 9. SPATIAL RULES (9:16)
+
+### Anchor Topology
+
+Use ONLY named anchors: `[sofa]`, `[entrance-door]`, `[glass-table]`, `[panoramic-window]`, etc.
+
+Format: `"[anchor], [distance] toward [anchor2] from [Actor]"`
+
+FORBIDDEN: compass directions (N/S/E/W), vague positions ("middle of the room"), absolute coordinates, `left/right` without `frame-` prefix.
+
+### Scale & Frame Exclusion
+
+Geometric limits per scale segment:
+
+- **ECU** (~30cm from subject): only the immediate subject and objects within 30cm. No other character may appear.
+- **CU** (~1m): primary subject and any actor physically within 1m. Others excluded from frame.
+- **MS** (~3–4m): actors within 3–4m. Actors beyond 4m excluded.
+- **WS**: any actor in the location may appear.
+
+At CU/ECU segments: no timed actions for off-frame characters. An off-frame character's mention is limited to: `"[Name] is off-frame."` at the end of the segment, no actions.
 
 ### Frame Density
 
-Max 2 major actions per prompt. Others = micro-motion only.
+Max **1 major action per scale segment** (~4–5s). For a 3-segment clip → up to 3 major actions total, sequentially. Every other body is on idle motion only.
 
-### 9:16 Optical Constraints
+### Vertical Framing (9:16)
 
-- **Mirror Law**: mirrors/reflections valid only at CU/ECU
-- **Two-Shot Rule**: use "Profile Two-Shot" for side-by-side actors
-- **Vertical Stacking**: place [Ref1] at top-frame and [Ref2] at bottom-frame to maximize scale
-- **Forbidden angles**: back-seat OTS toward center-dash; ECU of eyes + MS of body (Scale Salad)
+Faces dominate. Key subjects in the middle 65% of frame height. Top 15% and bottom 20% clear for subtitles/UI.
+
+### Two-Shot & Vertical Stacking (9:16 specific)
+
+- **Profile Two-Shot**: side-by-side actors in partial profile — default for confrontation at MS/MCU
+- **Vertical Stacking**: place [Ref1] at top-frame and [Ref2] at bottom-frame to maximize face scale — use for height-differentiated confrontation (seated + standing, child + adult)
+- FORBIDDEN: full frontal two-shot at MS — faces become too small for 9:16 readability
+
+### 180° Rule
+
+Camera axis consistent within a scale segment. Cross-axis allowed BETWEEN segments only if:
+
+- Actor physically crosses the scene mid-line during the transition, documented in the timed motion, OR
+- Camera executes an arc move ≥90° during the transition, declared explicitly: `"camera arcs 120° around [desk] from 4s to 5s"`
+
+### Mirror & Reflection Law
+
+Mirrors, glass reflections, phone screens as reflective surfaces: valid ONLY at CU/ECU segments. At MS/WS the reflection is too small to read and confuses the model.
+
+### Forbidden Composites
+
+- ECU of eyes + MS of body in same frame = Scale Salad, HARD FAILURE
+- Back-seat OTS framing toward a center-dash subject = unreadable at 9:16
+- Full-body shot with ECU-scale facial detail = HARD FAILURE
 
 ---
 
-## 7. PROMPT TEMPLATE
+## 10. PROMPT TEMPLATE
+
+Use this skeleton for each clip. Fill every bracketed slot.
 
 ```
-[0s] STATE: [RefA] (@Image1) at [desk], right hand grips [folder] (@Prop1).
-[RefB] (@Image2) 1m away, arms crossed.
-GAZE_TARGET: [RefA] → [folder], [RefB] → [RefA]
+[0s] STATE:
+  SCALE: [SCALE_TOKEN] — [panel_id, hook_type]
+  [RefA] (@ImageN) at [anchor], [pose], [body_detail].
+  [RefB] (@ImageM) [distance] toward [anchor2] from [RefA], [pose], [body_detail].
+  PROP: [PropA] (@PropX) at [anchor_or_body_part], [state].
+  GAZE_TARGET: [RefA] → [target], [RefB] → [target]
+  LIGHT: [key_direction], [quality], [color_temp]
 
-[0s–__T1__s]: micro-motion phase
-[__T1__s–__T2__s]: primary action
-[__T2__s–__T3__s]: reaction/escalation
-[__T3__s–__TARGET__s]: unstable tension hold
+[0s–T1s] SEGMENT 1 (panel P_i):
+  [T_a]→[T_b]: [Actor] [body_part] [verb] [measurement] to [anchor_or_person].
+  [T_b]→[T_c]: [Actor] [body_part] [verb] [measurement].
+  CONCURRENT: [OtherActor] [idle motion, anatomy + measurement].
+  at [Ts] [Speaker]: "[≤8-word dialogue]"
+  CONCURRENT: [Listener] [reactive motion].
 
-CONCURRENT: [RefB] shifts weight 3cm toward [RefA], jaw tightens.
+→ TRANSITION: camera pushes in during [T_n]s–[T_n+1]s to CU on [Actor].
 
-at 4s [RefB]: "You shouldn't be here."
+[T1s–T2s] SEGMENT 2 (panel P_i+1):
+  NEW ANCHOR: [fresh pose for in-frame actors at new scale]
+  [Tc]→[Td]: [Actor] [body_part] [verb] [measurement] to [anchor].
+  at [Ts] (VO) [Speaker]: "[4–5 word inner monologue]"
+  CONCURRENT: [OtherActor] [idle motion].
+
+→ TRANSITION: hard push-in to ECU on [Actor]'s [body_part] at [T]s.
+
+[T2s–__TARGET__s] SEGMENT 3 (panel P_i+2):
+  NEW ANCHOR: [ECU framing — subject body-part only]
+  [Te]→[Tf]: [body_part] [verb] [measurement].
+  at [Ts] [Speaker]: "[line]"
+
+  UNSTABLE END: [Actor] frozen mid-[verb], [body-part] [measurement] from [anchor]. Outcome not visible before clip ends.
 ```
-
-**Final Frame Rule**: must end on incomplete action or peak tension hold. FORBIDDEN: relaxed states, neutral standing.
 
 ---
 
-## 8. PRE-FLIGHT CHECKLIST
+## 11. PRE-FLIGHT CHECKLIST
 
-- [ ] Exactly 4 prompts?
-- [ ] Valid JSON only?
-- [ ] Each prompt __TARGET__s continuous?
-- [ ] No teleportation within a prompt?
-- [ ] Anchored movement only?
-- [ ] No character static > 2s?
-- [ ] Open thread continuity respected?
-- [ ] CU/ECU scale rules respected?
-- [ ] Ends unstable?
-- [ ] No forbidden visuals (sweat, tears, vapor)?
-- [ ] GAZE_TARGET present and valid?
-- [ ] ≥ 3 prompts include dialogue/VO?
-- [ ] References injected correctly?
-- [ ] Props continuous?
-- [ ] Camera axis preserved?
+### CRITICAL (most common failures)
 
+- [ ] Every in-frame actor has idle motion every second? (Living Pose)
+- [ ] GAZE_TARGET present for every multi-actor segment and matches head orientation?
+- [ ] `[0s]` = pre-action pose matching reference image (except Clip 1 cold_open)?
+- [ ] Every direction word resolves to a named anchor or person?
+- [ ] Each clip ends on an unstable hold (one of the templates in §8)?
+- [ ] Scale transitions motivated by declared camera move or cut-on-motion?
+
+### PANEL MAPPING
+
+- [ ] Exactly 4 clips for the full scene?
+- [ ] Anchor panels (P1, P⌈N×0.44⌉, P⌈N×0.78⌉, P_N) each get a dedicated scale segment?
+- [ ] Pivot or cliffhanger panels placed as the LAST segment of their clip?
+- [ ] Dialogue from P_N appears in the clip containing P_N?
+
+### STRUCTURAL
+
+- [ ] Valid JSON, exactly 4 strings, clip length matches __TARGET__s?
+- [ ] Each clip 250–450 words (multi-panel) or 150–300 words (2-panel)?
+- [ ] First-Frame Match Law satisfied between Clip N and Clip N+1?
+- [ ] Props continuous across all clips, position matches previous end state?
+- [ ] Camera axis preserved within each segment; arc move declared for cross-axis transitions?
+- [ ] CU/ECU segments: no timed actions for off-frame characters?
+- [ ] ≤3 scale segments per clip?
+
+### VERBAL
+
+- [ ] ≥3 of 4 clips contain dialogue or VO?
+- [ ] Dialogue ≤8 words/line, VO ≤5 words?
+- [ ] Clip speech budget within char-per-sec limit (see §8)?
+- [ ] ≥2s silence between consecutive spoken lines?
+- [ ] `CONCURRENT:` line present for every dialogue beat?
+- [ ] Speaker is in CU or ECU during their line?
+
+### CONTENT
+
+- [ ] No sweat, tears, vapor, breath fog, saliva, oral liquids?
+- [ ] No emotional verbs or metaphors — all physical description is anatomy + measurement?
+- [ ] No bare `forward/backward/toward camera/away`?
+- [ ] References injected at timestamp of first visible appearance, not at clip start?
+- [ ] Mid-clip character entries have a declared reveal mechanism (occlusion release, door, focus pull, lighting)?
+
+### SCENE CONTEXT (fill these before starting)
+
+```
+SCENE: [location] | [daytime] | background: [activity_or_none]
+INITIAL DISPOSITION: [character positions at [0s] of Clip 1]
+REFERENCES (inject inline at first visible appearance):
+  [Name] → @ImageN
+  [Prop] → @PropX
+NARRATIVE (context only): [1–2 sentences]
+STORYBOARD PANELS (N panels):
+  P1 [hook_type | scale | location]: POWER / EMOTION / STAKE OBJECT / STATE / DIALOGUE SEED
+  P_N [...]: ...
+EPISODE EXIT STATE: [final frame description — anchor for next scene]
+```
+
+---
+
+## 12. APPENDIX — QUICK REFERENCE
+
+### Scale Tokens
+
+`ECU` `CU` `MCU` `MS` `MWS` `WS`
+
+### Profile Tokens (for inter-character orientation)
+
+`FRONTAL` `3Q-FRONT` `SIDE` `3Q-REAR` `BACK`
+
+### Pose Tokens
+
+`standing` `seated` `leaning` `crouched` `kneeling` `half-risen` `perched` `prone`
+
+### Light Quality Tokens
+
+`hard` `soft` `diffuse` `rim` `flat`
+
+### Color Temp Tokens
+
+`warm` (≈3000K) `neutral` (≈5500K) `cold` (≈7000K)
+
+### Transition Verbs (between scale segments)
+
+`camera pushes in` `camera pulls back` `dolly-in` `dolly-out` `lens tracks to [ECU/CU] on [anchor]` `cut-on-motion at [T]s` `camera arcs [N]° around [anchor]` `rack focus from [FG] to [BG] at [T]s`
+
+### Emotion → Body Mechanics Quick Table
+
+| Emotion | Physical encoding |
+|---------|-------------------|
+| Fear | retreats 10–15cm, spine presses to [wall], shoulders rise 2cm, eyes sweep to exit |
+| Anger | slams palm, steps 20cm toward [target], jaw clamps, chin juts 3–5cm toward [target] |
+| Shame | gaze drops, chin drops 10° toward chest, shoulders curl inward, weight transfers to rear foot |
+| Grief | shoulders collapse 3–5cm, hands drop, gaze defocuses, jaw releases |
+| Contempt | upper lip tightens unilaterally, head tilts back 5–10°, weight rearward |
+| Shock | brows flash up 0.3s then soften, body stills 0.5s, hands freeze, then reactive motion |
+| Desire | closes distance 10–15cm, rotates to side profile, chin lifts 3° |
+| Dominance | steps 20cm toward [other], chest squared at [other] while their gaze breaks away |
+| Doubt | gaze breaks frame-right then returns, weight shifts to one foot, hand lifts toward chin then drops |
+| Relief | shoulders drop 2cm, jaw releases, chest drops on exhale, fist opens |
 </script>
 
 <!-- ═══════════════════════════════════════════════
