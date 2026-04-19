@@ -1560,6 +1560,8 @@ function buildQuickplayPrompt(ep, scene) {
     .replace(/__T3__/g, String(t3));
   const chars    = ep.characters || state.refs.filter(r=>r.type==='Character'&&!r.character_ref).map(r=>r.name);
   const location = scene.location || ep.location || 'Location';
+  const locationRef = state.refs.find(r => r.name === location && r.type !== 'Character');
+  const locationDesc = locationRef && locationRef.visual_desc ? locationRef.visual_desc.trim() : '';
   const refPairs = [...chars.map((c,i)=>[c,`@Image${i+1}`]), [location, `@Image${chars.length+1}`]];
   const refTable = refPairs.map(([n,t])=>`  ${n} → ${t}`).join('\n');
   const bg       = scene.background_activity || {};
@@ -1567,12 +1569,13 @@ function buildQuickplayPrompt(ep, scene) {
   return [
     system, '',
     `SCENE: ${location} | ${ep.daytime||''} | background: ${bgLine}`,
+    locationDesc ? `LOCATION VISUAL: ${locationDesc}` : null,
     `INITIAL DISPOSITION: ${scene.initial_disposition||'—'}`, '',
     'REFERENCES (inject these tags inline in every prompt):', refTable, '',
     'NARRATIVE (context only):', (ep.rewritten_condensed_narrative||'').trim(), '',
     `STORYBOARD PANELS (${scene.panel_count||'?'} panels):`, (scene.scene_instructions||'').trim(), '',
     'Return a JSON array of exactly 4 animation prompt strings.',
-  ].join('\n');
+  ].filter(Boolean).join('\n');
 }
 
 // ─────────────────────────────────────────────────────
