@@ -955,30 +955,75 @@ NO theatrical facial extremes: no bared teeth in anger, no sustained gaping mout
 NO animation of photos, photo frames or ultrasound scans.`;
 
 // ─────────────────────────────────────────────────────
-// STORAGE
+// STORAGE (IndexedDB, with localStorage migration)
 // ─────────────────────────────────────────────────────
 const NS = 'mdf:';
-function lsGet(k)    { try { return JSON.parse(localStorage.getItem(NS+k)); } catch(e) { return null; } }
-function lsSet(k, v) { localStorage.setItem(NS+k, JSON.stringify(v)); }
+const DB_NAME = 'mdf-db', DB_VER = 1, STORE = 'kv';
+let _db = null;
 
-const state = {
-  refs:       lsGet('refs')       || [],
-  refImages:  lsGet('refImages')  || {},
-  screenplay: lsGet('screenplay') || null,
-  quickplay:  lsGet('quickplay')  || {},
-};
+function _openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = e => {
+      if (!e.target.result.objectStoreNames.contains(STORE))
+        e.target.result.createObjectStore(STORE, { keyPath: 'k' });
+    };
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
 
-function saveRefs()       { lsSet('refs',       state.refs);       }
-function saveRefImages()  { lsSet('refImages',  state.refImages);  }
-function saveScreenplay() { lsSet('screenplay', state.screenplay); }
-function saveQuickplay()  { lsSet('quickplay',  state.quickplay);  }
+function dbGet(k) {
+  return new Promise(resolve => {
+    const req = _db.transaction(STORE, 'readonly').objectStore(STORE).get(k);
+    req.onsuccess = e => resolve(e.target.result != null ? e.target.result.v : null);
+    req.onerror   = () => resolve(null);
+  });
+}
 
-function bindPersist(id, key, init) {
+function dbSet(k, v) {
+  return new Promise(resolve => {
+    const req = _db.transaction(STORE, 'readwrite').objectStore(STORE).put({ k, v });
+    req.onsuccess = () => resolve();
+    req.onerror   = e => { console.error('dbSet', k, e.target.error); resolve(); };
+  });
+}
+
+async function _migrateLS() {
+  const jsonKeys = ['refs', 'refImages', 'screenplay', 'quickplay', 'backups'];
+  const txtKeys  = ['story', 'style', 'setting', 'cfgEp', 'cfgPan',
+                    'tmpl:casting', 'tmpl:screenplaySys', 'tmpl:screenplayEps', 'tmpl:quickplay'];
+  let any = false;
+  for (const k of jsonKeys) {
+    const v = localStorage.getItem(NS + k);
+    if (v !== null) {
+      try { await dbSet(k, JSON.parse(v)); } catch(_) {}
+      localStorage.removeItem(NS + k); any = true;
+    }
+  }
+  for (const k of txtKeys) {
+    const v = localStorage.getItem(NS + 'txt:' + k);
+    if (v !== null) {
+      await dbSet('txt:' + k, v);
+      localStorage.removeItem(NS + 'txt:' + k); any = true;
+    }
+  }
+  if (any) console.info('[mdf] Migrated localStorage → IndexedDB.');
+}
+
+const state = { refs: [], refImages: {}, screenplay: null, quickplay: {} };
+
+function saveRefs()       { dbSet('refs',       state.refs);       }
+function saveRefImages()  { dbSet('refImages',  state.refImages);  }
+function saveScreenplay() { dbSet('screenplay', state.screenplay); }
+function saveQuickplay()  { dbSet('quickplay',  state.quickplay);  }
+
+async function bindPersist(id, key, init) {
   const ta = document.getElementById(id);
   if (!ta) return;
-  const stored = localStorage.getItem(NS+'txt:'+key);
+  const stored = await dbGet('txt:' + key);
   ta.value = stored !== null ? stored : init;
-  ta.addEventListener('input', () => localStorage.setItem(NS+'txt:'+key, ta.value));
+  ta.addEventListener('input', () => dbSet('txt:' + key, ta.value));
 }
 
 // ─────────────────────────────────────────────────────
@@ -1022,16 +1067,16 @@ function trackMutation() {
   updateBackupStatus();
 }
 
-function _autoBackup() {
+async function _autoBackup() {
   const snap = { refs: state.refs, screenplay: state.screenplay, quickplay: state.quickplay, ts: Date.now() };
-  const list = lsGet('backups') || [];
+  const list = (await dbGet('backups')) || [];
   list.unshift(snap);
   if (list.length > 5) list.length = 5;
-  lsSet('backups', list);
+  await dbSet('backups', list);
 }
 
-function updateBackupStatus() {
-  const list = lsGet('backups') || [];
+async function updateBackupStatus() {
+  const list = (await dbGet('backups')) || [];
   const sp = el('backup-status');
   if (!sp) return;
   if (list.length) {
@@ -1041,8 +1086,8 @@ function updateBackupStatus() {
   }
 }
 
-function restoreBackup() {
-  const list = lsGet('backups') || [];
+async function restoreBackup() {
+  const list = (await dbGet('backups')) || [];
   if (!list.length) { alert('Нет сохранённых бэкапов.'); return; }
   const d = new Date(list[0].ts);
   if (!confirm(`Восстановить бэкап от ${d.toLocaleString('ru')}?\nТекущее состояние будет заменено.`)) return;
@@ -1333,7 +1378,7 @@ function renderCastingPreview() {
         <div style="width:100%;height:90px;overflow:hidden;border-radius:4px;background:var(--bg)">${thumb}</div>
         <div class="ref-card-name">${escHtml(r.name)}</div>
         <div class="ref-card-type">${escHtml(r.type||'?')} ${r.character_ref?`<span class="tag">вариация: ${escHtml(r.character_ref)}</span>`:''}</div>
-        <div class="ref-card-desc">${escHtml((r.visual_desc||'').slice(0,120))}…</div>
+        <div class="ref-card-desc">${escHtml((r.visual_desc||''))}…</div>
         <button class="btn btn-ghost btn-sm" data-ref="${escAttr(r.name)}" onclick="openRefModal(this.dataset.ref)">Редактировать / PNG</button>
       </div>`;
     }
@@ -1392,7 +1437,7 @@ function renderScreenplayPreview() {
         ${ep.pov_character ? `<span class="tag">POV: ${escHtml(ep.pov_character)}</span>` : ''}
         <span style="color:var(--muted);font-size:12px">${escHtml(ep.location||'')} · ${escHtml(ep.daytime||'')}</span>
       </div>
-      ${ep.rewritten_condensed_narrative ? `<div style="font-size:12px;color:var(--muted);margin-bottom:8px">${escHtml(ep.rewritten_condensed_narrative.slice(0,200))}…</div>` : ''}
+      ${ep.rewritten_condensed_narrative ? `<div style="font-size:12px;color:var(--muted);margin-bottom:8px">${escHtml(ep.rewritten_condensed_narrative)}…</div>` : ''}
       ${scenes.map(s=>`<div class="scene-block">
         <div class="scene-meta">
           <span>Сцена ${s.scene_local_id}</span>
@@ -1400,8 +1445,8 @@ function renderScreenplayPreview() {
           <span class="badge badge-orange">${s.panel_count||'?'} panels</span>
           ${s.background_activity ? `<span>bg: ${escHtml(s.background_activity.density||'?')}</span>` : ''}
         </div>
-        ${s.initial_disposition ? `<div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-family:var(--mono)">${escHtml(s.initial_disposition.slice(0,200))}</div>` : ''}
-        <div class="scene-instructions">${escHtml((s.scene_instructions||'').slice(0,600))}${(s.scene_instructions||'').length>600?'…':''}</div>
+        ${s.initial_disposition ? `<div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-family:var(--mono)">${escHtml(s.initial_disposition)}</div>` : ''}
+        <div class="scene-instructions">${escHtml((s.scene_instructions||''))}${(s.scene_instructions||'').length>600?'…':''}</div>
       </div>`).join('')}
     </div>`;
   }
@@ -1529,7 +1574,7 @@ function renderLibrary() {
         : `<div class="ref-thumb-placeholder" data-ref="${escAttr(r.name)}" onclick="openRefModal(this.dataset.ref)">+ Загрузить PNG</div>`}
       <div class="ref-card-name">${escHtml(r.name)}</div>
       <div class="ref-card-type">${escHtml(r.type||'?')}${r.character_ref ? ` · вариация: ${escHtml(r.character_ref)}` : ''}</div>
-      <div class="ref-card-desc">${escHtml((r.visual_desc||'').slice(0,100))}…</div>
+      <div class="ref-card-desc">${escHtml((r.visual_desc||''))}…</div>
       <button class="btn btn-ghost btn-sm" data-ref="${escAttr(r.name)}" onclick="openRefModal(this.dataset.ref)">Редактировать / Загрузить</button>
     </div>`;
   }
@@ -1674,26 +1719,38 @@ function resetTmpl(key) {
   const ta = el('tmpl-edit-' + key);
   if (!ta) return;
   ta.value = TMPL[key];
-  localStorage.setItem(NS + 'txt:tmpl:' + key, TMPL[key]);
+  dbSet('txt:tmpl:' + key, TMPL[key]);
 }
 
 // ─────────────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────────────
-bindPersist('story-text',              'story',              '');
-bindPersist('style-text',              'style',              TMPL.style);
-bindPersist('setting-text',            'setting',            TMPL.setting);
-bindPersist('cfg-episodes',            'cfgEp',              '3');
-bindPersist('cfg-panels',              'cfgPan',             '4,6,9,10,12');
-bindPersist('tmpl-edit-casting',       'tmpl:casting',       TMPL.casting);
-bindPersist('tmpl-edit-screenplaySys', 'tmpl:screenplaySys', TMPL.screenplaySys);
-bindPersist('tmpl-edit-screenplayEps', 'tmpl:screenplayEps', TMPL.screenplayEps);
-bindPersist('tmpl-edit-quickplay',     'tmpl:quickplay',     TMPL.quickplay);
+(async () => {
+  _db = await _openDB();
+  await _migrateLS();
 
-renderCastingPreview();
-renderScreenplayPreview();
-statusEl();
-updateBackupStatus();
+  state.refs       = (await dbGet('refs'))       || [];
+  state.refImages  = (await dbGet('refImages'))  || {};
+  state.screenplay = (await dbGet('screenplay')) || null;
+  state.quickplay  = (await dbGet('quickplay'))  || {};
+
+  await bindPersist('story-text',              'story',              '');
+  await bindPersist('style-text',              'style',              TMPL.style);
+  await bindPersist('setting-text',            'setting',            TMPL.setting);
+  await bindPersist('cfg-episodes',            'cfgEp',              '3');
+  await bindPersist('cfg-panels',              'cfgPan',             '4,6,9,10,12');
+  await bindPersist('tmpl-edit-casting',       'tmpl:casting',       TMPL.casting);
+  await bindPersist('tmpl-edit-screenplaySys', 'tmpl:screenplaySys', TMPL.screenplaySys);
+  await bindPersist('tmpl-edit-screenplayEps', 'tmpl:screenplayEps', TMPL.screenplayEps);
+  await bindPersist('tmpl-edit-quickplay',     'tmpl:quickplay',     TMPL.quickplay);
+
+  renderCastingPreview();
+  renderScreenplayPreview();
+  renderLibrary();
+  renderQuickplay();
+  statusEl();
+  updateBackupStatus();
+})();
 </script>
 </body>
 </html>
