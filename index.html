@@ -355,56 +355,52 @@ COLD OPEN FORBIDDEN: "stands motionless", "sits still", "waits", "holds position
 - EMOTIONAL RUPTURE: unexpected betrayal, confession, or silence
 - INTERRUPTED ACTION: cut mid-gesture, mid-word, mid-step
 
-## REVISED: SCENE_INSTRUCTIONS FORMAT
+## SCENE_INSTRUCTIONS FORMAT
 
 ### EPISODE [N] PRODUCTION BLUEPRINT
 **EPISODE ENTRY STATE:** * **Continues from:** [One sentence context]
-* **P1 opens on:** [Action 50% complete at frame 0]
+* **P1 opens on:** [Specific action 50% complete at frame 0]
 
 **SONIC ARC:** [Crescendo/Silence map]
 
 ---
 
-### PANEL-BY-PANEL LOGIC TABLE
-| Panel | Type | Mechanical Instruction |
-| :--- | :--- | :--- |
-| **P1** | **COLD_OPEN** | **Law:** First word after "At 0s" must be a motion verb. |
-| **P2** | **VERBAL_HOOK** | **Law:** Max 8 words. Crystallize the central conflict. |
-| **P3–P(N-1)** | **ESCALATION** | **Law:** Alternate scales. Each panel must shift the power dynamic. |
-| **P⌈N×0.78⌉** | **PIVOT** | **Law:** ECU reaction. **VO: Exactly 4–5 words.** |
-| **PN** | **EXIT/PEAK** | **Law:** Tension_peak or Cliffhanger logic. |
+### THE LINEAR MANIFEST (P1–PN)
+ **PRODUCTION PROTOCOL:** You must generate the full block below for every panel $P_1$ through $P_n$. **DO NOT SUMMARIZE.** Every panel requires a unique physical delta.
 
----
-
-### FULL SEQUENCE SPECIFICATIONS
- **Mandatory:** Generate the following block for ALL panels $P_1$ through $P_n$ without omission.
-
-**P[X] [TYPE | SCALE | LOCATION]**
-* **POWER:** [Who controls through what physical indicator]
-* **EMOTION:** [Physics of primary face — micro-expression/tension]
-* **STAKE OBJECT:** [One prop or detail that carries the subtext]
-* **STATE:** [What changes from visual_start to visual_end; physical delta]
+**P1 [COLD_OPEN | SCALE | LOCATION]**
+* **POWER:** [Who controls frame through what physical indicator]
+* **EMOTION:** [Face physics — jaw tension mm / pupil dilation / brow furrow]
+* **STAKE OBJECT:** [The prop/detail carrying the subtext]
+* **STATE:** [Visual_start to visual_end; e.g., "Hand moves from X to Y"]
 * **DIALOGUE SEED:** [≤8-word line, or "— silence —", or "VO: 4–5 words"]
 
----
+**P2 [VERBAL_HOOK | SCALE | LOCATION]**
+* [POWER / EMOTION / STAKE OBJECT / STATE / DIALOGUE SEED]
+
+**P3 [ESCALATION | SCALE | LOCATION]**
+* [POWER / EMOTION / STAKE OBJECT / STATE / DIALOGUE SEED]
+
+**[... Repeat for P4 through P⌈N×0.78⌉-1 ...]**
 
 **P⌈N×0.78⌉ [PIVOT | ECU | LOCATION]**
 * **POWER:** [Spatial disposition at peak pressure]
-* **EMOTION:** [Face physics at moment of maximum inner conflict]
-* **STAKE OBJECT:** [Focus on the critical sensory detail]
-* **STATE:** [Micro-movement or lighting shift]
+* **EMOTION:** [Maximum inner conflict — micro-expression delta]
+* **STAKE OBJECT:** [Sensory focus point]
+* **STATE:** [The exact moment the visual shift peaks]
 * **DIALOGUE SEED:** **VO: [4–5 words exactly]**
 
----
+**[... Repeat for all remaining panels until PN ...]**
 
-**PN [EXIT_TYPE | SCALE | LOCATION]**
+**PN [EXIT_TYPE (Peak or Cliffhanger) | SCALE | LOCATION]**
 * **POWER / EMOTION / STAKE OBJECT / STATE / DIALOGUE SEED**
 * **EPISODE EXIT STATE:**
-    * **Location:** [Specific room/coord]
-    * **Character positions:** [Orientation/distance for continuity]
-    * **Active lighting:** [Source and tone]
-    * **Active props:** [Final state of items]
-    * **Next episode opens on:** [One sentence transition]
+    * **Location:** [Exact Coord]
+    * **Character positions:** [Distance/Orientation for continuity]
+    * **Active lighting:** [Source/Color/Intensity]
+    * **Active props:** [Final state/Position]
+    * **Next episode opens on:** [One sentence bridge]
+
 
 FORBIDDEN in scene_instructions: beat labels without content, role codes without visual content.
 
