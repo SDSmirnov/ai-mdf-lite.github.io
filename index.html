@@ -980,6 +980,109 @@ Use this skeleton for each clip. Fill every bracketed slot.
 </script>
 
 <!-- ═══════════════════════════════════════════════
+     LOGIC TEMPLATE
+════════════════════════════════════════════════ -->
+
+<script type="text/plain" id="tmpl-logic">
+Ты выполняешь три задачи подряд по тексту главы.
+Верни ответ строго в трёх секциях. Каждую секцию начинай с заголовка вида «## СЕКЦИЯ N».
+Между секциями ставь разделитель: строку из трёх дефисов (---).
+
+## СЕКЦИЯ 1 — ЗАНУДА-ОТЧЁТ
+
+Ты — "ЗАНУДА-ЛОГИК", строгий редактор по логике, физике и пространству.
+
+Обязательные проверки:
+
+1. ФИЗИЧЕСКАЯ ЛОГИКА:
+   - Каждое описание звука, движения, ощущения — возможно ли это физически?
+   - Соответствуют ли глаголы свойствам взаимодействующих объектов?
+   - Пример ошибки: "морось стучала" (морось не стучит — она моросит)
+   - Пример ошибки: "керамика царапнула ворс" (керамика скребёт или шуршит, но не царапает мягкий ворс)
+   - Взаимодействие с предметами, движения, падения, прыжки, бег - нет ли нарушений физики и биомеханики?
+
+2. ПРОСТРАНСТВЕННАЯ ЛОГИКА:
+   - Не телепортируются ли персонажи? Соответствуют ли расстояния времени перемещения?
+   - Видит / слышит ли персонаж то, что физически возможно с его позиции?
+   - Помещаются ли все объекты и персонажи в описанном пространстве?
+   - Не противоречат ли детали окружения (тип пола, расположение мебели) друг другу в разных частях текста?
+
+3. ВРЕМЕННАЯ ЛОГИКА:
+   - Нет ли скачков или необъяснённых дыр во времени?
+   - Может ли персонаж успеть сделать всё описанное за указанное время?
+   - Логично ли время суток / освещение / погода для хода событий?
+   - Не происходят ли одновременно действия, требующие последовательности?
+   - Тайминг слов (речь 130-150 слов в минуту) и действий?
+   - Скорость движений и перемещений?
+
+4. ЛОГИКА ПОСЛЕДСТВИЙ:
+   - Если персонаж получил травму, удар или физическое воздействие — есть ли последствия?
+   - Соответствует ли реакция тела описанному воздействию (боль, кровь, потеря равновесия)?
+   - Правовые и нормативные ограничения мира?
+
+5. ПРИЧИННО-СЛЕДСТВЕННЫЕ СВЯЗИ:
+   - Логично ли следуют события друг за другом? Нет ли пропущенных промежуточных этапов?
+   - Откуда персонаж знает то, о чём говорит? Не использует ли он знания, которые ещё не получал?
+
+Формат отчёта:
+Для каждой ошибки: • [ТИП] «цитата» → Претензия → Решение
+Если ошибок нет — написать «Ошибок не найдено».
+
+---
+
+## СЕКЦИЯ 2 — ИСПРАВЛЕННЫЙ ТЕКСТ
+
+Полный исправленный текст с учётом всех претензий из Секции 1.
+Сохраняй авторский голос, стиль, метафоры, ритм.
+Исправляй ТОЛЬКО найденные логические/физические/пространственные ошибки.
+Не добавляй новые сцены, персонажей, сюжетные повороты.
+Обсценная лексика и сцены насилия допустимы.
+
+---
+
+## СЕКЦИЯ 3 — МАСТЕР СЕТТИНГА И ДЕКОРАЦИЙ
+
+Ты — технический консультант по локациям и реквизиту для кино и театра.
+По готовому тексту главы составь техническое приложение "Мастер сеттинга и декораций" —
+список физических и пространственных предусловий, необходимых для того, чтобы все описанные
+в тексте действия были физически возможны.
+
+Для каждой локации, упомянутой в главе, укажи:
+
+1. **Локация**: название / тип пространства
+2. **Обязательные объекты**: что должно находиться в сцене и где (примерное расположение)
+3. **Пространственные требования**: минимальные расстояния, проходы, свободное пространство,
+   необходимые для описанных действий
+4. **Состояние объектов до начала сцены**: в каком виде должны быть предметы
+   (пример: "на столе лежат бумаги", "дверь приоткрыта", "стул стоит у окна")
+5. **Физические условия**: освещение, погода, время суток — если это влияет на возможность
+   описанных действий
+
+Пример рассуждения: герой спотыкается и падает на стол, сметая бумаги, поэтому:
+- нужен предмет для спотыкания (порог, ковёр, брошенная вещь, чья-то нога)
+- от точки спотыкания до стола — 1–2 м, стол в направлении падения
+- на столе до начала сцены лежат бумаги
+- свободное пространство для падения тела — не менее 1,5 м
+
+Дополнительное руководство по анализу пространства:
+
+### STEP 1 — ENVIRONMENT TYPE REASONING
+Identify the space type (office, cafe, kitchen, garage, hospital ward, prison cell, living room, etc.). List what items are TYPICALLY present in such a space: furniture, equipment, surfaces, fixtures, materials, lighting. What would a visitor notice first? What is on every desk/counter/shelf/wall in this kind of place?
+
+### STEP 2 — STORY-REQUIRED SPECIFICS
+Re-read the novel excerpt. For each character who uses this space:
+- What is their ROLE/JOB? Role determines what is on their station.
+- Which actions happen at their spot? What props must be physically present?
+- Which props are explicitly named in the text? Place them exactly.
+- Any recurring visits to the same spot? Give it a stable anchor label.
+
+Для каждой локации дай детальное описание пространства в формате компаса (NORTH/SOUTH/EAST/WEST WALL, CENTER, CEILING/FLOOR)
+с именованными якорями мебели и оборудования — это войдёт в кастинг как ref_thriller описание локации.
+
+Пиши по-русски. Будь конкретен. Это технический документ для постановщика.
+</script>
+
+<!-- ═══════════════════════════════════════════════
      APP HTML
 ════════════════════════════════════════════════ -->
 
@@ -987,6 +1090,7 @@ Use this skeleton for each clip. Fill every bracketed slot.
   <header>
     <span class="brand">⬛ AI-MDF Lite</span>
     <nav id="nav">
+      <button class="nav-btn" data-tab="logic">0 · Логика</button>
       <button class="nav-btn active" data-tab="setup">1 · Настройки</button>
       <button class="nav-btn" data-tab="cast">2 · Кастинг</button>
       <button class="nav-btn" data-tab="screenplay">3 · Сценарий</button>
@@ -1000,6 +1104,38 @@ Use this skeleton for each clip. Fill every bracketed slot.
   </header>
 
   <main>
+
+    <!-- ── 0. LOGIC ─────────────────────────────── -->
+    <section id="tab-logic" class="tab">
+      <div class="section-row">
+        <span class="section-title">Шаг 0 — Логика <span class="badge badge-orange">необязательно</span></span>
+        <span id="logic-status" class="status">анализ не сохранён</span>
+      </div>
+      <div class="tip">Находит логические, физические и пространственные ошибки. Возвращает: отчёт занудика + исправленный текст + описания локаций (улучшает кастинг и сценарий).</div>
+      <br>
+      <div class="actions">
+        <button class="btn btn-primary" id="gen-logic-btn">Сгенерировать промпт</button>
+        <button class="btn" id="copy-logic-btn">Копировать промпт</button>
+      </div>
+      <br>
+      <div class="card">
+        <div class="card-title">Промпт</div>
+        <div id="logic-prompt" class="prompt-area" style="max-height:260px">(нажмите «Сгенерировать промпт» выше)</div>
+      </div>
+      <br>
+      <div class="card">
+        <div class="card-title">Вставьте ответ чатбота (3 секции через ---)</div>
+        <textarea id="logic-response" class="mono" rows="16" placeholder="Вставьте полный ответ чатбота — три секции: Зануда-отчёт, Исправленный текст, Мастер сеттинга..."></textarea>
+        <br>
+        <div class="actions">
+          <button class="btn btn-primary" id="save-logic-btn">Сохранить анализ</button>
+          <button class="btn btn-ghost" id="apply-fixed-btn" title="Заменить текст истории исправленным текстом из секции 2">Применить исправленный текст →</button>
+          <button class="btn btn-ghost" id="clear-logic-btn">Очистить</button>
+        </div>
+      </div>
+      <br>
+      <div id="logic-preview"></div>
+    </section>
 
     <!-- ── 1. SETUP ─────────────────────────────── -->
     <section id="tab-setup" class="tab active">
@@ -1243,6 +1379,7 @@ const TMPL = {
   screenplaySys: tmpl('tmpl-screenplay-sys'),
   screenplayEps: tmpl('tmpl-screenplay-eps'),
   quickplay:     tmpl('tmpl-quickplay'),
+  logic:         tmpl('tmpl-logic'),
 };
 
 function getTmpl(key) {
@@ -1295,7 +1432,7 @@ function dbSet(k, v) {
 }
 
 async function _migrateLS() {
-  const jsonKeys = ['refs', 'refImages', 'screenplay', 'quickplay', 'backups'];
+  const jsonKeys = ['refs', 'refImages', 'screenplay', 'quickplay', 'backups', 'logic'];
   const txtKeys  = ['story', 'style', 'setting', 'cfgEp', 'cfgPan',
                     'tmpl:casting', 'tmpl:screenplaySys', 'tmpl:screenplayEps', 'tmpl:quickplay'];
   let any = false;
@@ -1316,12 +1453,13 @@ async function _migrateLS() {
   if (any) console.info('[mdf] Migrated localStorage → IndexedDB.');
 }
 
-const state = { refs: [], refImages: {}, screenplay: null, quickplay: {} };
+const state = { refs: [], refImages: {}, screenplay: null, quickplay: {}, logic: null };
 
 function saveRefs()       { dbSet('refs',       state.refs);       }
 function saveRefImages()  { dbSet('refImages',  state.refImages);  }
 function saveScreenplay() { dbSet('screenplay', state.screenplay); }
 function saveQuickplay()  { dbSet('quickplay',  state.quickplay);  }
+function saveLogic()      { dbSet('logic',      state.logic);      }
 
 async function bindPersist(id, key, init) {
   const ta = document.getElementById(id);
@@ -1341,6 +1479,7 @@ function pushUndo() {
     refs:       JSON.parse(JSON.stringify(state.refs)),
     screenplay: JSON.parse(JSON.stringify(state.screenplay)),
     quickplay:  JSON.parse(JSON.stringify(state.quickplay)),
+    logic:      JSON.parse(JSON.stringify(state.logic)),
   });
   if (_undo.length > 5) _undo.shift();
   _updateUndoBtn();
@@ -1349,9 +1488,9 @@ function pushUndo() {
 function _undoLast() {
   if (!_undo.length) return;
   const s = _undo.pop();
-  state.refs = s.refs; state.screenplay = s.screenplay; state.quickplay = s.quickplay;
-  saveRefs(); saveScreenplay(); saveQuickplay();
-  renderCastingPreview(); renderScreenplayPreview(); renderQuickplay(); renderLibrary(); statusEl();
+  state.refs = s.refs; state.screenplay = s.screenplay; state.quickplay = s.quickplay; state.logic = s.logic;
+  saveRefs(); saveScreenplay(); saveQuickplay(); saveLogic();
+  renderCastingPreview(); renderScreenplayPreview(); renderQuickplay(); renderLibrary(); renderLogicPreview(); statusEl();
   _updateUndoBtn();
 }
 
@@ -1373,7 +1512,7 @@ function trackMutation() {
 }
 
 async function _autoBackup() {
-  const snap = { refs: state.refs, screenplay: state.screenplay, quickplay: state.quickplay, ts: Date.now() };
+  const snap = { refs: state.refs, screenplay: state.screenplay, quickplay: state.quickplay, logic: state.logic, ts: Date.now() };
   const list = (await dbGet('backups')) || [];
   list.unshift(snap);
   if (list.length > 5) list.length = 5;
@@ -1398,9 +1537,9 @@ async function restoreBackup() {
   if (!confirm(`Восстановить бэкап от ${d.toLocaleString('ru')}?\nТекущее состояние будет заменено.`)) return;
   pushUndo();
   const s = list[0];
-  state.refs = s.refs || []; state.screenplay = s.screenplay || null; state.quickplay = s.quickplay || {};
-  saveRefs(); saveScreenplay(); saveQuickplay();
-  renderCastingPreview(); renderScreenplayPreview(); renderQuickplay(); renderLibrary(); statusEl();
+  state.refs = s.refs || []; state.screenplay = s.screenplay || null; state.quickplay = s.quickplay || {}; state.logic = s.logic || null;
+  saveRefs(); saveScreenplay(); saveQuickplay(); saveLogic();
+  renderCastingPreview(); renderScreenplayPreview(); renderQuickplay(); renderLibrary(); renderLogicPreview(); statusEl();
 }
 
 // ─────────────────────────────────────────────────────
@@ -1490,12 +1629,19 @@ document.getElementById('nav').addEventListener('click', e => {
   if (name === 'library')    renderLibrary();
   if (name === 'cast')       renderCastingPreview();
   if (name === 'screenplay') renderScreenplayPreview();
+  if (name === 'logic')      renderLogicPreview();
 });
 
 // ─────────────────────────────────────────────────────
 // STATUS
 // ─────────────────────────────────────────────────────
 function statusEl() {
+  const logicEl = el('logic-status');
+  if (logicEl) {
+    const ok = state.logic && state.logic.raw;
+    logicEl.textContent = ok ? 'анализ сохранён' : 'анализ не сохранён';
+    logicEl.className = 'status ' + (ok ? 'ok' : '');
+  }
   const castEl = el('cast-status');
   const spEl   = el('screenplay-status');
   const qpEl   = el('qp-status');
@@ -1525,10 +1671,14 @@ function buildCastingPrompt() {
   const style   = el('style-text').value;
   const setting = el('setting-text').value;
   const story   = el('story-text').value.trim();
+  const roomsContext = state.logic && state.logic.rooms
+    ? ['## LOCATION PREREQUISITES (from Logic Step 0)', state.logic.rooms, '']
+    : [];
   return [
     getTmpl('casting'), '', '---',
     '## VISUAL STYLE', style, '',
     '## WORLD SETTING', setting, '', '---',
+    ...roomsContext,
     '## STORY TEXT', story || '(no story text entered)', '', '---',
     '## OUTPUT',
     'Return a JSON array of reference objects. Each object must include:',
@@ -1596,6 +1746,92 @@ function buildQuickplayPrompt(ep, scene) {
   ].filter(Boolean).join('\n');
 }
 
+function buildLogicPrompt() {
+  const story = el('story-text').value.trim();
+  return [
+    TMPL.logic, '',
+    '---',
+    '## ТЕКСТ ГЛАВЫ',
+    story || '(текст не введён)',
+  ].join('\n');
+}
+
+function parseLogicSections(raw) {
+  const parts = raw.split(/\n---\n/);
+  const get = (i) => (parts[i] || '').trim();
+  return { raw, zanuda: get(0), fixed: get(1), rooms: get(2) };
+}
+
+// ─────────────────────────────────────────────────────
+// LOGIC STEP
+// ─────────────────────────────────────────────────────
+el('gen-logic-btn').addEventListener('click', () => {
+  const prompt = buildLogicPrompt();
+  el('logic-prompt').textContent = prompt;
+  el('logic-prompt')._cached = prompt;
+});
+
+el('copy-logic-btn').addEventListener('click', () => {
+  const text = el('logic-prompt')._cached || el('logic-prompt').textContent;
+  if (!text || text.startsWith('(нажмите')) { alert('Сначала сгенерируйте промпт.'); return; }
+  copyText(text); flashBtn('copy-logic-btn');
+});
+
+el('save-logic-btn').addEventListener('click', () => {
+  const raw = el('logic-response').value.trim();
+  if (!raw) { alert('Сначала вставьте ответ чатбота.'); return; }
+  pushUndo();
+  state.logic = parseLogicSections(raw);
+  saveLogic(); trackMutation();
+  renderLogicPreview(); statusEl();
+  alert('✅ Анализ сохранён.');
+});
+
+el('apply-fixed-btn').addEventListener('click', () => {
+  const logic = state.logic;
+  if (!logic || !logic.fixed) { alert('Сначала сохраните анализ — секция 2 пуста.'); return; }
+  if (!confirm('Заменить текст истории исправленным текстом из Секции 2?')) return;
+  el('story-text').value = logic.fixed;
+  dbSet('txt:story', logic.fixed);
+  alert('✅ Текст истории обновлён.');
+});
+
+el('clear-logic-btn').addEventListener('click', () => {
+  if (!confirm('Очистить сохранённый анализ?')) return;
+  pushUndo();
+  state.logic = null; saveLogic(); trackMutation();
+  el('logic-response').value = '';
+  dbSet('txt:logic-response', '');
+  renderLogicPreview(); statusEl();
+});
+
+function renderLogicPreview() {
+  const container = el('logic-preview');
+  if (!container) return;
+  const logic = state.logic;
+  if (!logic || !logic.raw) { container.innerHTML = ''; return; }
+  const sections = [
+    { title: 'Секция 1 — Зануда-отчёт', content: logic.zanuda, badge: 'badge-orange' },
+    { title: 'Секция 2 — Исправленный текст', content: logic.fixed, badge: 'badge-green' },
+    { title: 'Секция 3 — Мастер сеттинга и декораций', content: logic.rooms, badge: 'badge-blue' },
+  ];
+  let html = '';
+  for (const sec of sections) {
+    const preview = (sec.content || '').slice(0, 400);
+    html += `<div class="card" style="margin-bottom:10px">
+      <div class="tmpl-card-hdr">
+        <div class="card-title" style="margin-bottom:0">${escHtml(sec.title)}</div>
+        <span class="badge ${sec.badge}">${sec.content ? sec.content.split(/\s+/).length + ' слов' : 'пусто'}</span>
+      </div>
+      <div class="prompt-area" style="max-height:180px;margin-top:8px">${escHtml(preview)}${(sec.content||'').length > 400 ? '\n…' : ''}</div>
+      <div style="margin-top:6px">
+        <button class="btn btn-sm btn-ghost" onclick="copyText(${JSON.stringify(sec.content||'')});this.textContent='Скопировано!';setTimeout(()=>this.textContent='Копировать секцию',1500)">Копировать секцию</button>
+      </div>
+    </div>`;
+  }
+  container.innerHTML = html;
+}
+
 // ─────────────────────────────────────────────────────
 // ANIMATION WRAPPER
 // ─────────────────────────────────────────────────────
@@ -1657,9 +1893,15 @@ el('parse-casting-btn').addEventListener('click', () => {
   const errs = validateRefsArr(arr);
   if (!showValidation('cast-validation', errs)) return;
   pushUndo();
-  state.refs = arr; saveRefs(); trackMutation();
+  let added = 0, updated = 0;
+  for (const incoming of arr) {
+    const idx = state.refs.findIndex(r => r.name === incoming.name);
+    if (idx >= 0) { state.refs[idx] = { ...state.refs[idx], ...incoming }; updated++; }
+    else          { state.refs.push(incoming); added++; }
+  }
+  saveRefs(); trackMutation();
   renderCastingPreview(); statusEl();
-  alert(`✅ Сохранено рефов: ${arr.length}.`);
+  alert(`✅ Рефы обновлены: добавлено ${added}, обновлено ${updated}.`);
 });
 
 el('clear-refs-btn').addEventListener('click', () => {
@@ -2041,6 +2283,7 @@ function resetTmpl(key) {
   state.refImages  = (await dbGet('refImages'))  || {};
   state.screenplay = (await dbGet('screenplay')) || null;
   state.quickplay  = (await dbGet('quickplay'))  || {};
+  state.logic      = (await dbGet('logic'))      || null;
 
   await bindPersist('story-text',              'story',              '');
   await bindPersist('style-text',              'style',              TMPL.style);
@@ -2051,11 +2294,13 @@ function resetTmpl(key) {
   await bindPersist('tmpl-edit-screenplaySys', 'tmpl:screenplaySys', TMPL.screenplaySys);
   await bindPersist('tmpl-edit-screenplayEps', 'tmpl:screenplayEps', TMPL.screenplayEps);
   await bindPersist('tmpl-edit-quickplay',     'tmpl:quickplay',     TMPL.quickplay);
+  await bindPersist('logic-response',          'logic-response',     '');
 
   renderCastingPreview();
   renderScreenplayPreview();
   renderLibrary();
   renderQuickplay();
+  renderLogicPreview();
   statusEl();
   updateBackupStatus();
 })();
