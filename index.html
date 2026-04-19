@@ -1825,7 +1825,7 @@ function renderLogicPreview() {
       </div>
       <div class="prompt-area" style="max-height:180px;margin-top:8px">${escHtml(preview)}${(sec.content||'').length > 400 ? '\n…' : ''}</div>
       <div style="margin-top:6px">
-        <button class="btn btn-sm btn-ghost" onclick="copyText(${JSON.stringify(sec.content||'')});this.textContent='Скопировано!';setTimeout(()=>this.textContent='Копировать секцию',1500)">Копировать секцию</button>
+        <button class="btn btn-sm btn-ghost" data-copy="${escAttr(sec.content||'')}" onclick="copyText(this.dataset.copy);this.textContent='Скопировано!';setTimeout(()=>this.textContent='Копировать секцию',1500)">Копировать секцию</button>
       </div>
     </div>`;
   }
