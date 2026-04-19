@@ -355,58 +355,56 @@ COLD OPEN FORBIDDEN: "stands motionless", "sits still", "waits", "holds position
 - EMOTIONAL RUPTURE: unexpected betrayal, confession, or silence
 - INTERRUPTED ACTION: cut mid-gesture, mid-word, mid-step
 
-## SCENE_INSTRUCTIONS FORMAT
-
-[!IMPORTANT]
-**STRICT COMPLETION RULE:** Every panel from $P_1$ to $P_n$ must be explicitly generated in numerical order. No ellipses, no placeholders, and no skipping connective tissue between anchor panels.
+## REVISED: SCENE_INSTRUCTIONS FORMAT
 
 ### EPISODE [N] PRODUCTION BLUEPRINT
-**EPISODE ENTRY STATE:** * **Continues from:** [One sentence context regarding previous episode exit]
-* **P1 opens on:** [Specific action 50% complete at frame 0]
+**EPISODE ENTRY STATE:** * **Continues from:** [One sentence context]
+* **P1 opens on:** [Action 50% complete at frame 0]
 
-**SONIC ARC:** [Define where silence lives, where the sonic hit lands, and the crescendo moment]
+**SONIC ARC:** [Crescendo/Silence map]
 
 ---
 
 ### PANEL-BY-PANEL LOGIC TABLE
 | Panel | Type | Mechanical Instruction |
 | :--- | :--- | :--- |
-| **P1** | **COLD_OPEN** | **Law:** First word after "At 0s" must be a motion verb. No static poses. |
-| **P2** | **VERBAL_HOOK** | **Law:** Max 8 words. Crystallize the central conflict immediately. |
-| **P3–P(N-1)** | **ESCALATION** | **Law:** Alternate scales (MS -> CU -> MCU). Each panel must shift the power dynamic. |
-| **P⌈N×0.78⌉** | **PIVOT** | **Law:** ECU reaction shot. No dialogue. **VO: Exactly 4–5 words.** |
-| **PN** | **EXIT/PEAK** | **Law:** Tension_peak (Intermediate) or Cliffhanger (Final). |
+| **P1** | **COLD_OPEN** | **Law:** First word after "At 0s" must be a motion verb. |
+| **P2** | **VERBAL_HOOK** | **Law:** Max 8 words. Crystallize the central conflict. |
+| **P3–P(N-1)** | **ESCALATION** | **Law:** Alternate scales. Each panel must shift the power dynamic. |
+| **P⌈N×0.78⌉** | **PIVOT** | **Law:** ECU reaction. **VO: Exactly 4–5 words.** |
+| **PN** | **EXIT/PEAK** | **Law:** Tension_peak or Cliffhanger logic. |
 
 ---
 
-### DETAILED PANEL SPECIFICATIONS
+### FULL SEQUENCE SPECIFICATIONS
+ **Mandatory:** Generate the following block for ALL panels $P_1$ through $P_n$ without omission.
 
-**P1 [COLD_OPEN | SCALE | LOCATION]**
-* **POWER:** [Who controls the frame through what physical indicator]
+**P[X] [TYPE | SCALE | LOCATION]**
+* **POWER:** [Who controls through what physical indicator]
 * **EMOTION:** [Physics of primary face — micro-expression/tension]
-* **STAKE:** [One prop or detail that carries the subtext]
-* **STATE:** [Visual A to Visual B change; what physically moves]
-* **DIALOGUE:** [≤8 words, "— silence —", or "VO: 4–5 words"]
+* **STAKE OBJECT:** [One prop or detail that carries the subtext]
+* **STATE:** [What changes from visual_start to visual_end; physical delta]
+* **DIALOGUE SEED:** [≤8-word line, or "— silence —", or "VO: 4–5 words"]
 
-**P2 [VERBAL_HOOK | SCALE | LOCATION]**
-* **POWER / EMOTION / STAKE / STATE / DIALOGUE**
-
-**[... Repeat the full specification block for every panel (P3, P4, P5, etc.) until PN is reached ...]**
+---
 
 **P⌈N×0.78⌉ [PIVOT | ECU | LOCATION]**
 * **POWER:** [Spatial disposition at peak pressure]
 * **EMOTION:** [Face physics at moment of maximum inner conflict]
-* **STAKE:** [Focus on eyes or a trembling detail]
+* **STAKE OBJECT:** [Focus on the critical sensory detail]
 * **STATE:** [Micro-movement or lighting shift]
-* **DIALOGUE:** **VO: [4–5 words exactly]**
+* **DIALOGUE SEED:** **VO: [4–5 words exactly]**
 
-**PN [EXIT_STATE | SCALE | LOCATION]**
-* **POWER / EMOTION / STAKE / STATE / DIALOGUE**
+---
+
+**PN [EXIT_TYPE | SCALE | LOCATION]**
+* **POWER / EMOTION / STAKE OBJECT / STATE / DIALOGUE SEED**
 * **EPISODE EXIT STATE:**
-    * **Location:** [Specific room]
+    * **Location:** [Specific room/coord]
     * **Character positions:** [Orientation/distance for continuity]
+    * **Active lighting:** [Source and tone]
     * **Active props:** [Final state of items]
-    * **Next episode opens on:** [One sentence transition description]``
+    * **Next episode opens on:** [One sentence transition]
 
 FORBIDDEN in scene_instructions: beat labels without content, role codes without visual content.
 
