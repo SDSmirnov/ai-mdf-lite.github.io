@@ -1922,7 +1922,7 @@ function renderCastingPreview() {
     for (const r of typeRefs) {
       const img   = state.refImages[r.name];
       const thumb = img
-        ? `<img src="${img}" style="width:100%;height:100%;object-fit:cover;border-radius:4px">`
+        ? `<img src="${img}" style="width:100%;height:100%;object-fit:contain;border-radius:4px">`
         : `<div class="ref-thumb-placeholder" data-ref="${escAttr(r.name)}" onclick="openRefModal(this.dataset.ref)">+ PNG</div>`;
       html += `<div class="ref-card">
         <div style="width:100%;height:90px;overflow:hidden;border-radius:4px;background:var(--bg)">${thumb}</div>
@@ -2120,7 +2120,7 @@ function renderLibrary() {
     const img = state.refImages[r.name];
     html += `<div class="ref-card">
       ${img
-        ? `<div style="height:160px;overflow:hidden;border-radius:4px"><img src="${img}" style="width:100%;height:100%;object-fit:cover"></div>`
+        ? `<div style="height:160px;overflow:hidden;border-radius:4px"><img src="${img}" style="width:100%;height:100%;object-fit:contain"></div>`
         : `<div class="ref-thumb-placeholder" data-ref="${escAttr(r.name)}" onclick="openRefModal(this.dataset.ref)">+ Загрузить PNG</div>`}
       <div class="ref-card-name">${escHtml(r.name)}</div>
       <div class="ref-card-type">${escHtml(r.type||'?')}${r.character_ref ? ` · вариация: ${escHtml(r.character_ref)}` : ''}</div>
@@ -2143,7 +2143,7 @@ function openRefModal(name) {
   el('modal-json').value = JSON.stringify(ref, null, 2);
   const img = state.refImages[name];
   el('modal-thumb').innerHTML = img
-    ? `<img src="${img}" style="width:100%;height:100%;object-fit:cover;border-radius:4px">`
+    ? `<img src="${img}" style="width:100%;height:100%;object-fit:contain;border-radius:4px">`
     : '<span>кликните для загрузки</span>';
   el('ref-modal').style.display = 'block';
 }
@@ -2159,7 +2159,7 @@ el('modal-img-file').addEventListener('change', e => {
   reader.onload = ev => {
     state.refImages[_modalRefName] = ev.target.result;
     saveRefImages();
-    el('modal-thumb').innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:4px">`;
+    el('modal-thumb').innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:contain;border-radius:4px">`;
     renderLibrary(); renderCastingPreview();
   };
   reader.readAsDataURL(file);
