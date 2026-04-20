@@ -534,21 +534,31 @@ These are dramaturgically load-bearing and must get their own scale segment:
 
 ## 3. OUTPUT FORMAT
 
-Return EXACTLY:
+Return EXACTLY 4 objects (one per clip):
 
 ```json
 [
-  "Prompt 1 (__TARGET__s continuous)",
-  "Prompt 2 (__TARGET__s continuous)",
-  "Prompt 3 (__TARGET__s continuous)",
-  "Prompt 4 (__TARGET__s continuous)"
+  {
+    "location": {"LocationName": "@ImageN"},
+    "prompt": "Clip 1 (__TARGET__s continuous)",
+    "references": {"Name1": "@ImageN", "Name2": "@ImageN"}
+  },
+  {
+    "location": {"LocationName": "@ImageN"},
+    "prompt": "Clip 2 (__TARGET__s continuous)",
+    "references": {"Name1": "@ImageN"}
+  },
+  ...
 ]
 ```
 
 Rules:
 
 - No extra keys, no explanations, no markdown outside the JSON
-- Each string = one continuous clip (250–450 words for multi-panel clips; 150–300 for 2-panel clips)
+- `prompt` = one continuous clip text (250–450 words for multi-panel clips; 150–300 for 2-panel clips)
+- `references` = only characters/props that visibly appear in this clip
+- `location` = always the scene location with its @ImageN tag
+- Max 7 @Image tags referenced total across all clips
 - Prompts must be self-contained but state-continuous (see First-Frame Match Law, §7)
 
 ---
@@ -910,8 +920,9 @@ Use this skeleton for each clip. Fill every bracketed slot.
 
 ### STRUCTURAL
 
-- [ ] Valid JSON, exactly 4 strings, clip length matches __TARGET__s?
-- [ ] Each clip 250–450 words (multi-panel) or 150–300 words (2-panel)?
+- [ ] Valid JSON array of exactly 4 objects with location/prompt/references keys?
+- [ ] Each `prompt` 250–450 words (multi-panel) or 150–300 words (2-panel)?
+- [ ] `references` contains only refs visible in that clip; max 7 @Image tags total?
 - [ ] First-Frame Match Law satisfied between Clip N and Clip N+1?
 - [ ] Props continuous across all clips, position matches previous end state?
 - [ ] Camera axis preserved within each segment; arc move declared for cross-axis transitions?
@@ -1488,7 +1499,7 @@ function pushUndo() {
 function _undoLast() {
   if (!_undo.length) return;
   const s = _undo.pop();
-  state.refs = s.refs; state.screenplay = s.screenplay; state.quickplay = s.quickplay; state.logic = s.logic;
+  state.refs = s.refs; state.screenplay = s.screenplay; state.quickplay = migrateQuickplay(s.quickplay); state.logic = s.logic;
   saveRefs(); saveScreenplay(); saveQuickplay(); saveLogic();
   renderCastingPreview(); renderScreenplayPreview(); renderQuickplay(); renderLibrary(); renderLogicPreview(); statusEl();
   _updateUndoBtn();
@@ -1537,7 +1548,7 @@ async function restoreBackup() {
   if (!confirm(`Восстановить бэкап от ${d.toLocaleString('ru')}?\nТекущее состояние будет заменено.`)) return;
   pushUndo();
   const s = list[0];
-  state.refs = s.refs || []; state.screenplay = s.screenplay || null; state.quickplay = s.quickplay || {}; state.logic = s.logic || null;
+  state.refs = s.refs || []; state.screenplay = s.screenplay || null; state.quickplay = migrateQuickplay(s.quickplay); state.logic = s.logic || null;
   saveRefs(); saveScreenplay(); saveQuickplay(); saveLogic();
   renderCastingPreview(); renderScreenplayPreview(); renderQuickplay(); renderLibrary(); renderLogicPreview(); statusEl();
 }
@@ -1716,6 +1727,20 @@ function buildScreenplayPrompt() {
   ].join('\n');
 }
 
+const REF_LIMIT = 7;
+
+// Migrate old quickplay format (array of strings) to new (array of objects)
+function migrateQuickplay(qp) {
+  if (!qp || typeof qp !== 'object') return qp || {};
+  const out = {};
+  for (const [k, clips] of Object.entries(qp)) {
+    out[k] = Array.isArray(clips)
+      ? clips.map(c => typeof c === 'string' ? { location: {}, prompt: c, references: {} } : c)
+      : clips;
+  }
+  return out;
+}
+
 function buildQuickplayPrompt(ep, scene) {
   const target = parseInt(el('cfg-clip-duration').value, 10);
   const t1 = Math.round(target * 0.20);
@@ -1726,23 +1751,53 @@ function buildQuickplayPrompt(ep, scene) {
     .replace(/__T1__/g, String(t1))
     .replace(/__T2__/g, String(t2))
     .replace(/__T3__/g, String(t3));
-  const chars    = ep.characters || state.refs.filter(r=>r.type==='Character'&&!r.character_ref).map(r=>r.name);
+
+  const allChars = ep.characters || state.refs.filter(r=>r.type==='Character'&&!r.character_ref).map(r=>r.name);
+  const chars    = allChars.slice(0, REF_LIMIT - 1); // reserve 1 slot for location
   const location = scene.location || ep.location || 'Location';
   const locationRef = state.refs.find(r => r.name === location && r.type !== 'Character');
   const locationDesc = locationRef && locationRef.visual_desc ? locationRef.visual_desc.trim() : '';
-  const refPairs = [...chars.map((c,i)=>[c,`@Image${i+1}`]), [location, `@Image${chars.length+1}`]];
-  const refTable = refPairs.map(([n,t])=>`  ${n} → ${t}`).join('\n');
-  const bg       = scene.background_activity || {};
-  const bgLine   = bg.density && bg.density !== 'none' ? `${bg.density} — ${bg.crowd_type||''}` : 'private, no extras';
+
+  // [name, @ImageN, visual_desc]
+  const refEntries = [
+    ...chars.map((c, i) => {
+      const r = state.refs.find(x => x.name === c);
+      return [c, `@Image${i+1}`, r && r.visual_desc ? r.visual_desc.trim() : ''];
+    }),
+    [location, `@Image${chars.length+1}`, locationDesc],
+  ];
+
+  const refTable = refEntries.map(([n, tag, desc]) =>
+    desc ? `  ${tag} — ${n}:\n${desc.replace(/^/gm, '    ')}` : `  ${tag} — ${n}`
+  ).join('\n\n');
+
+  const bg     = scene.background_activity || {};
+  const bgLine = bg.density && bg.density !== 'none' ? `${bg.density} — ${bg.crowd_type||''}` : 'private, no extras';
+
+  const locEntry  = refEntries[refEntries.length - 1];
+  const charPairs = refEntries.slice(0, -1).map(([n, tag]) => `"${n}": "${tag}"`).join(', ');
+  const outputFmt = [
+    'Return a JSON array of exactly 4 objects (one per clip):',
+    '[',
+    '  {',
+    `    "location": {"${location}": "${locEntry[1]}"},`,
+    `    "prompt": "clip text (${target}s continuous)",`,
+    `    "references": {${charPairs}}`,
+    '  },',
+    '  ...',
+    ']',
+    `Only include in "references" the characters/props that actually appear in that clip. Max ${REF_LIMIT} @Image tags total.`,
+  ].join('\n');
+
   return [
     system, '',
     `SCENE: ${location} | ${ep.daytime||''} | background: ${bgLine}`,
-    locationDesc ? `LOCATION VISUAL: ${locationDesc}` : null,
     `INITIAL DISPOSITION: ${scene.initial_disposition||'—'}`, '',
-    'REFERENCES (inject these tags inline in every prompt):', refTable, '',
+    'REFERENCES (inject @ImageN tags inline — full visual description included):',
+    refTable, '',
     'NARRATIVE (context only):', (ep.rewritten_condensed_narrative||'').trim(), '',
     `STORYBOARD PANELS (${scene.panel_count||'?'} panels):`, (scene.scene_instructions||'').trim(), '',
-    'Return a JSON array of exactly 4 animation prompt strings.',
+    outputFmt,
   ].filter(Boolean).join('\n');
 }
 
@@ -1853,20 +1908,19 @@ let _animSceneId = null, _animClipIdx = 0;
 
 function openAnimModal(sceneId, clipIdx) {
   _animSceneId = sceneId; _animClipIdx = clipIdx;
-  const clips    = state.quickplay[sceneId] || [];
-  const clipText = clips[clipIdx] || '';
-  const speaks   = /["«»]|says:/i.test(clipText);
+  const clips = state.quickplay[sceneId] || [];
+  const text  = clipText(clips[clipIdx]);
+  const speaks = /["«»]|says:/i.test(text);
   el('anim-modal-title').textContent = `${sceneId} · Клип ${clipIdx+1}`;
   el('anim-speaks').checked = speaks;
-  el('anim-modal-text').value = buildAnimWrapper(clipText, speaks);
+  el('anim-modal-text').value = buildAnimWrapper(text, speaks);
   el('anim-modal').style.display = 'block';
 }
 
 function refreshAnimWrapper() {
   if (_animSceneId === null) return;
-  const clips    = state.quickplay[_animSceneId] || [];
-  const clipText = clips[_animClipIdx] || '';
-  el('anim-modal-text').value = buildAnimWrapper(clipText, el('anim-speaks').checked);
+  const clips = state.quickplay[_animSceneId] || [];
+  el('anim-modal-text').value = buildAnimWrapper(clipText(clips[_animClipIdx]), el('anim-speaks').checked);
 }
 
 // ─────────────────────────────────────────────────────
@@ -2035,7 +2089,7 @@ function renderQuickplay() {
         <div id="qp-prompt-${sceneId}" class="prompt-area" style="max-height:200px;display:none"></div>
         <div style="margin-top:10px">
           <label>Вставьте ответ чатбота (JSON-массив из 4 строк)</label>
-          <textarea id="qp-resp-${sceneId}" class="mono" rows="6" placeholder='["промпт клипа 1...","клип 2...","клип 3...","клип 4..."]'>${hasClips ? escHtml(JSON.stringify(clips, null, 2)) : ''}</textarea>
+          <textarea id="qp-resp-${sceneId}" class="mono" rows="6" placeholder='[{"location":{"Loc":"@Image1"},"prompt":"...","references":{"Name":"@Image2"}}, ...]'>${hasClips ? escHtml(JSON.stringify(clips, null, 2)) : ''}</textarea>
           <div class="actions" style="margin-top:6px">
             <button class="btn btn-sm btn-primary" data-scid="${sceneId}" onclick="saveQPClips(this.dataset.scid)">Сохранить клипы</button>
           </div>
@@ -2079,16 +2133,24 @@ function saveQPClips(sceneId) {
   alert(`✅ Сохранено клипов: ${arr.length} для ${sceneId}.`);
 }
 
+function clipText(c)  { return typeof c === 'object' && c ? (c.prompt || '') : (c || ''); }
+function clipRefs(c)  { return typeof c === 'object' && c && c.references ? c.references : null; }
+function clipLoc(c)   { return typeof c === 'object' && c && c.location  ? c.location  : null; }
+
 function renderClips(clips, sceneId) {
-  const refs = buildRefList(sceneId);
   let html = '<div class="clips-list">';
   clips.forEach((c, i) => {
+    const refs = clipRefs(c);
+    const loc  = clipLoc(c);
+    const refsLabel = refs
+      ? Object.entries({...loc||{}, ...refs}).map(([n,tag]) => `${n}=${tag}`).join(', ')
+      : buildRefList(sceneId).join(', ');
     html += `<div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:4px;display:flex;justify-content:space-between;align-items:center">
-        <span>Клип ${i+1}${refs.length ? ' — рефы: ' + escHtml(refs.join(', ')) : ''}</span>
+        <span>Клип ${i+1}${refsLabel ? ' — ' + escHtml(refsLabel) : ''}</span>
         <button class="btn btn-ghost btn-sm" style="font-size:10px;padding:2px 8px" data-scid="${sceneId}" data-ci="${i}" onclick="openAnimModal(this.dataset.scid, +this.dataset.ci)">Полный промпт ↗</button>
       </div>
-      <div class="clip-item">${escHtml(c)}</div>
+      <div class="clip-item">${escHtml(clipText(c))}</div>
     </div>`;
   });
   html += '</div>';
@@ -2238,7 +2300,7 @@ el('import-project-file').addEventListener('change', e => {
       if (data.refs)       { state.refs       = data.refs;       saveRefs();       }
       if (data.refImages)  { state.refImages  = data.refImages;  saveRefImages();  }
       if (data.screenplay) { state.screenplay = data.screenplay; saveScreenplay(); }
-      if (data.quickplay)  { state.quickplay  = data.quickplay;  saveQuickplay();  }
+      if (data.quickplay)  { state.quickplay  = migrateQuickplay(data.quickplay);  saveQuickplay();  }
       trackMutation();
       renderLibrary(); renderCastingPreview(); renderScreenplayPreview(); renderQuickplay(); statusEl();
       alert('✅ Проект импортирован.');
@@ -2282,7 +2344,7 @@ function resetTmpl(key) {
   state.refs       = (await dbGet('refs'))       || [];
   state.refImages  = (await dbGet('refImages'))  || {};
   state.screenplay = (await dbGet('screenplay')) || null;
-  state.quickplay  = (await dbGet('quickplay'))  || {};
+  state.quickplay  = migrateQuickplay(await dbGet('quickplay'));
   state.logic      = (await dbGet('logic'))      || null;
 
   await bindPersist('story-text',              'story',              '');
