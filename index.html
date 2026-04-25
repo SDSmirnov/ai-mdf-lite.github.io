@@ -441,6 +441,10 @@ CHARACTER STATE LEDGER:
   [Name] (EP[N]): [costume] | [injuries] | [last active prop] | [last location] | [story state]
 ```
 
+### Author's Voice fidelity
+
+In rewritten_condensed_narrative and screenplay instructions try to keep author's voice - core ideas, humorous points, etc. which make this story distinctive and alive.
+
 ### Language Rules
 
 - All dialogues and voiceover, labels, interfaces **MUST BE** in Russian, as in original text``
@@ -821,6 +825,37 @@ Facial expressions: micro only, no sustained extremes. Always include micro-moti
 
 ## 9. SPATIAL RULES (9:16)
 
+### Camera Axis Declaration (REQUIRED)
+
+Every `[0s] STATE` block MUST declare camera position and facing axis:
+
+```
+CAMERA: at [room-anchor], axis toward [room-anchor2], height [eye-level|low-angle|high-angle]
+```
+
+- `at [room-anchor]`: where the camera is placed (e.g., `[entrance-door]`, `[far-wall]`, `[left-wall]`)
+- `axis toward [room-anchor2]`: what the camera points at — this defines the 180° axis for the entire clip
+- `height`: `eye-level` (default), `low-angle` (below waist), `high-angle` (above head)
+
+Every `NEW ANCHOR` block MUST confirm or update camera:
+
+```
+CAMERA: unchanged  — OR —  at [new-anchor], axis toward [room-anchor2]
+```
+
+Every in-frame actor in `STATE` and `NEW ANCHOR` MUST declare facing:
+
+```
+[RefA] at [anchor], FACING: frame-right, [pose], [body_detail].
+[RefB] at [anchor2], FACING: frame-left, [pose], [body_detail].
+```
+
+`FACING: frame-right` means the actor's gaze/nose points toward frame-right. This, combined with the declared camera axis, fully resolves who is frame-left vs frame-right and what depth ordering looks like.
+
+**Missing `CAMERA` field = HARD FAILURE. Actor without `FACING` in STATE or NEW ANCHOR = HARD FAILURE.**
+
+---
+
 ### Anchor Topology
 
 Use ONLY named anchors: `[sofa]`, `[entrance-door]`, `[glass-table]`, `[panoramic-window]`, etc.
@@ -879,11 +914,13 @@ Use this skeleton for each clip. Fill every bracketed slot.
 
 ```
 [0s] STATE:
+  TIME: [time of the day] in the [location] (@ImageN)
   SCALE: [SCALE_TOKEN] — [panel_id, hook_type]
-  [RefA] (@ImageN) at [anchor], [pose], [body_detail].
-  [RefB] (@ImageM) [distance] toward [anchor2] from [RefA], [pose], [body_detail].
-  PROP: [PropA] (@PropX) at [anchor_or_body_part], [state].
-  GAZE_TARGET: [RefA] → [target], [RefB] → [target]
+  CAMERA: at [room-anchor], axis toward [room-anchor2], height [eye-level|low-angle|high-angle]
+  [RefA] (@ImageN) at [anchor], FACING: [frame-left|frame-right|frame-center], [pose], [body_detail].
+  [RefB] (@ImageM) [distance] toward [anchor2] from [RefA], FACING: [frame-left|frame-right], [pose], [body_detail].
+  PROP: [PropA] at [anchor_or_body_part], [state].
+  GAZE_TARGET: [RefA] looking at [target], [RefB] looking at [target]
   LIGHT: [key_direction], [quality], [color_temp]
 
 [0s–T1s] SEGMENT 1 (panel P_i):
@@ -897,6 +934,8 @@ Use this skeleton for each clip. Fill every bracketed slot.
 
 [T1s–T2s] SEGMENT 2 (panel P_i+1):
   NEW ANCHOR: [fresh pose for in-frame actors at new scale]
+  CAMERA: unchanged — OR — at [new-anchor], axis toward [room-anchor2]
+  [InFrameActor] FACING: [frame-left|frame-right|frame-center], [pose at new scale].
   [Tc]→[Td]: [Actor] [body_part] [verb] [measurement] to [anchor].
   at [Ts] (VO) [Speaker]: "[4–5 word inner monologue]"
   CONCURRENT: [OtherActor] [idle motion].
@@ -945,6 +984,10 @@ Use this skeleton for each clip. Fill every bracketed slot.
 - [ ] Camera axis preserved within each segment; arc move declared for cross-axis transitions?
 - [ ] CU/ECU segments: no timed actions for off-frame characters?
 - [ ] ≤3 scale segments per clip?
+- [ ] `CAMERA:` field present in every `[0s] STATE`?
+- [ ] Every `NEW ANCHOR` block confirms or updates `CAMERA:`?
+- [ ] Every in-frame actor has `FACING:` declared in STATE and NEW ANCHOR?
+- [ ] Camera axis (`at → toward` vector) unchanged within clip unless arc move declared?
 
 ### VERBAL
 
@@ -970,6 +1013,17 @@ Use this skeleton for each clip. Fill every bracketed slot.
 ### Scale Tokens
 
 `ECU` `CU` `MCU` `MS` `MWS` `WS`
+
+### Camera Height Tokens
+
+`eye-level` `low-angle` `high-angle`
+
+### Actor Facing Tokens (FACING: field)
+
+`frame-left` `frame-right` `frame-center`
+
+> `frame-right` = actor's gaze/nose points toward the right edge of the frame.
+> Combined with the declared CAMERA axis, this fully resolves depth order and left/right placement.
 
 ### Profile Tokens (for inter-character orientation)
 
