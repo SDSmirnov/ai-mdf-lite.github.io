@@ -889,6 +889,24 @@ Faces dominate. Key subjects in the middle 65% of frame height. Top 15% and bott
 - **Vertical Stacking**: place [Ref1] at top-frame and [Ref2] at bottom-frame to maximize face scale — use for height-differentiated confrontation (seated + standing, child + adult)
 - FORBIDDEN: full frontal two-shot at MS — faces become too small for 9:16 readability
 
+### FRONTAL Constraint — critical for Grok Imagine
+
+`PROFILE: FRONTAL` = actor's face directed at the camera lens. `PROFILE: BACK` = actor's back to the lens.
+FORBIDDEN: two or more actors with `PROFILE: FRONTAL` in the same multi-actor MS/WS/MCU segment — produces a **chorus-line failure** where all faces simultaneously address the camera.
+
+**Confrontation rule (≥2 actors in MS/MCU):**
+- At most ONE actor per segment may have `PROFILE: FRONTAL`.
+- Characters facing each other: opposing `frame-LEFT / frame-RIGHT` placement with `PROFILE: SIDE` or `PROFILE: 3Q-FRONT`.
+- Back-to-camera actors: `frame-CENTER, PROFILE: BACK`.
+
+### Lateral Spread in Multi-Actor Shots
+
+In any segment with ≥2 actors at MS/MWS/WS scale, actors MUST occupy **distinct horizontal frame positions**. Depth-only separation (all at `frame-CENTER`, differentiated only by distance) is FORBIDDEN — in 9:16 vertical it collapses into a column of forward-facing faces.
+
+Required distribution:
+- 2 actors: one `frame-LEFT`, one `frame-RIGHT`.
+- 3 actors: `frame-LEFT` + `frame-CENTER` + `frame-RIGHT`, or two on one side + one opposite. Never all `frame-CENTER`.
+
 ### 180° Rule
 
 Camera axis consistent within a scale segment. Cross-axis allowed BETWEEN segments only if:
@@ -917,8 +935,9 @@ Use this skeleton for each clip. Fill every bracketed slot.
   TIME: [time of the day] in the [location] (@ImageN)
   SCALE: [SCALE_TOKEN] — [panel_id, hook_type]
   CAMERA: at [room-anchor], axis toward [room-anchor2], height [eye-level|low-angle|high-angle]
-  [RefA] (@ImageN) at [anchor], FACING: [frame-left|frame-right|frame-center], [pose], [body_detail].
-  [RefB] (@ImageM) [distance] toward [anchor2] from [RefA], FACING: [frame-left|frame-right], [pose], [body_detail].
+  [RefA] (@ImageN) frame-[LEFT|CENTER|RIGHT] [FG|MG|BG], at [anchor], PROFILE: [FRONTAL|3Q-FRONT|SIDE|3Q-REAR|BACK], [pose], [body_detail].
+  [RefB] (@ImageM) frame-[LEFT|CENTER|RIGHT] [FG|MG|BG], at [anchor2], PROFILE: [FRONTAL|3Q-FRONT|SIDE|3Q-REAR|BACK], [pose], [body_detail].
+  VISUAL DEPTH: Camera → [RefA]([SHORT]) → [distance]m gap → [RefB]([SHORT]) → [anchor]
   PROP: [PropA] at [anchor_or_body_part], [state].
   GAZE_TARGET: [RefA] looking at [target], [RefB] looking at [target]
   LIGHT: [key_direction], [quality], [color_temp]
@@ -935,7 +954,7 @@ Use this skeleton for each clip. Fill every bracketed slot.
 [T1s–T2s] SEGMENT 2 (panel P_i+1):
   NEW ANCHOR: [fresh pose for in-frame actors at new scale]
   CAMERA: unchanged — OR — at [new-anchor], axis toward [room-anchor2]
-  [InFrameActor] FACING: [frame-left|frame-right|frame-center], [pose at new scale].
+  [InFrameActor] frame-[LEFT|CENTER|RIGHT] [FG|MG|BG], PROFILE: [FRONTAL|3Q-FRONT|SIDE|3Q-REAR|BACK], [pose at new scale].
   [Tc]→[Td]: [Actor] [body_part] [verb] [measurement] to [anchor].
   at [Ts] (VO) [Speaker]: "[4–5 word inner monologue]"
   CONCURRENT: [OtherActor] [idle motion].
@@ -986,7 +1005,10 @@ Use this skeleton for each clip. Fill every bracketed slot.
 - [ ] ≤3 scale segments per clip?
 - [ ] `CAMERA:` field present in every `[0s] STATE`?
 - [ ] Every `NEW ANCHOR` block confirms or updates `CAMERA:`?
-- [ ] Every in-frame actor has `FACING:` declared in STATE and NEW ANCHOR?
+- [ ] Every in-frame actor has `frame-[LEFT|CENTER|RIGHT] [FG|MG|BG], PROFILE:` declared in STATE and NEW ANCHOR?
+- [ ] `VISUAL DEPTH:` line present in every `[0s] STATE` block?
+- [ ] ≤1 actor with `PROFILE: FRONTAL` per multi-actor MS/WS/MCU segment?
+- [ ] Multi-actor MS/WS: actors span ≥2 distinct frame positions (not all `frame-CENTER`)?
 - [ ] Camera axis (`at → toward` vector) unchanged within clip unless arc move declared?
 
 ### VERBAL
@@ -1018,16 +1040,39 @@ Use this skeleton for each clip. Fill every bracketed slot.
 
 `eye-level` `low-angle` `high-angle`
 
-### Actor Facing Tokens (FACING: field)
+### Frame Position Tokens (lateral placement in frame)
 
-`frame-left` `frame-right` `frame-center`
+`frame-LEFT` `frame-CENTER` `frame-RIGHT`
 
-> `frame-right` = actor's gaze/nose points toward the right edge of the frame.
-> Combined with the declared CAMERA axis, this fully resolves depth order and left/right placement.
+> Declares which horizontal zone the actor occupies in the frame. Derived from anchor x-coordinate + camera axis projection (§9).
 
-### Profile Tokens (for inter-character orientation)
+### Profile Tokens (camera-relative body angle — MANDATORY per actor)
 
-`FRONTAL` `3Q-FRONT` `SIDE` `3Q-REAR` `BACK`
+`FRONTAL` — face directed at lens. Use with `frame-CENTER` only.
+`3Q-FRONT` — 45° off-axis, face partially toward camera.
+`SIDE` — 90° profile, ear to camera.
+`3Q-REAR` — 135° off-axis, mostly back to camera.
+`BACK` — back fully to camera. Use with `frame-CENTER` only.
+
+PROFILE is derived from camera direction and actor position with respect to actor body and head rotation:
+- actor by far wall, camera at doorway, actor looks at the doorway → `FRONTAL` or `3Q-FRONT`
+- actor in the doorway, camera at the doorway, actor faces inside the room → `BACK` or `3Q-REAR`
+- actor at far wall, camera at doorway, actor looks sideways at another character → `SIDE`
+
+### VISUAL DEPTH line format
+
+Declares the camera→subject depth chain with profiles for every STATE block.
+
+```
+VISUAL DEPTH: Camera → [Actor1]([SHORT]) → [N]m gap → [Actor2]([SHORT]) → [anchor]
+```
+
+SHORT codes: `FR` = FRONTAL · `3QF` = 3Q-FRONT · `SIDE` · `3QR` = 3Q-REAR · `BACK`
+
+Example:
+```
+VISUAL DEPTH: Camera → Nastya(BACK) → Maxim(BACK) → 3m gap → Undead(FR) → entrance-door
+```
 
 ### Pose Tokens
 
